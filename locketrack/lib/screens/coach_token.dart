@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:locketrack/screens/list_pokemon.dart';
 
 class CoachToken extends StatelessWidget {
   const CoachToken({
@@ -13,9 +14,13 @@ class CoachToken extends StatelessWidget {
       ),
       body: Center(
         child: ElevatedButton(
-          child: Text("Go to Back"),
+          child: const Text("Pokedex"),
           onPressed: () {
-            Navigator.of(context).pop();
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const Pokedex(),
+              ),
+            );
           },
         ),
       ),

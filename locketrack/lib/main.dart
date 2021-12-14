@@ -36,9 +36,11 @@ class MainScreen extends StatelessWidget {
             const Icon(Icons.backpack_outlined, size: 40, color: Colors.white),
         backgroundColor: Colors.orange,
         onPressed: () {
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => const CoachToken(),
-          ));
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const CoachToken(),
+            ),
+          );
         },
       ),
       body: RuteScreen(),
