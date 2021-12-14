@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "962223808667",
+    "project_id": "locke-track",
+    "storage_bucket": "locke-track.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:962223808667:android:c4c95a015ac0aa3bd5e63e",
+        "android_client_info": {
+          "package_name": "com.example.firebase"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "962223808667-a38ekja06jmngjmi0cs1bca66t84p6v0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEtAGGulkzettrdqaEte8BOwWBA9uhnHk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "962223808667-a38ekja06jmngjmi0cs1bca66t84p6v0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:962223808667:android:e6c9e78b09aeb56bd5e63e",
+        "android_client_info": {
+          "package_name": "com.example.locketrack"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "962223808667-a38ekja06jmngjmi0cs1bca66t84p6v0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEtAGGulkzettrdqaEte8BOwWBA9uhnHk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "962223808667-a38ekja06jmngjmi0cs1bca66t84p6v0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
