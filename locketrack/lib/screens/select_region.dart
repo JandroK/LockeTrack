@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:locketrack/screens/rutes.dart';
+import 'package:locketrack/screens/kanto_screen.dart';
 
 class RegionNameMap extends StatelessWidget {
-  final List<Widget> regionScreens = [RuteScreen()];
+  final List<Widget> regionScreens = [KantoScreen()];
   final List<String> path = [
     "kanto_map.png",
     "johto_map.png",

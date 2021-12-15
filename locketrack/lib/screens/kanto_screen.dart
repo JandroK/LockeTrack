@@ -1,18 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:locketrack/custom_classes/rute_class.dart';
+import 'package:locketrack/custom_classes/route.dart';
 import 'package:locketrack/screens/coach_token.dart';
 
-class RuteScreen extends StatefulWidget {
-  RuteScreen({
+class KantoScreen extends StatefulWidget {
+  KantoScreen({
     Key? key,
   }) : super(key: key);
 
   @override
-  State<RuteScreen> createState() => _RuteScreenState();
+  State<KantoScreen> createState() => _KantoScreenState();
 }
 
-class _RuteScreenState extends State<RuteScreen> {
+class _KantoScreenState extends State<KantoScreen> {
   final db = FirebaseFirestore.instance;
   List<String> routes = [];
 
