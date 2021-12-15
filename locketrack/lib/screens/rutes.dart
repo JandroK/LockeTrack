@@ -36,6 +36,7 @@ class _RuteScreenState extends State<RuteScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const RegionNameMap(name: "Kanto", path: "assets/kanto_map.jpg"),
+          const SizedBox(height: 10),
           Container(
             child: const RouteInfo(),
             padding: const EdgeInsets.all(12),
@@ -59,38 +60,62 @@ class RouteInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
+    return Column(
       children: [
-        Expanded(
-          flex: 1,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Route Name"),
-              SizedBox(height: 10),
-              InputText(fieldName: "Pokémon: ", name: ""),
-              SizedBox(height: 10),
-              InputText(fieldName: "Status:      ", name: ""),
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              //   children: [Checkbox(value: false, onChanged: (bool? value) {})],
-              // )
-            ],
-          ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Route Name"),
+                  const SizedBox(height: 10),
+                  InputText(fieldName: "Pokémon: ", name: ""),
+                  const SizedBox(height: 10),
+                  InputText(fieldName: "Status:      ", name: ""),
+                ],
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.only(left: 10),
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.orange,
+              ),
+              child: const Icon(Icons.add, size: 70),
+            ),
+          ],
         ),
-        Container(
-          margin: const EdgeInsets.only(left: 10),
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.orange,
-          ),
-          child: const Icon(
-            Icons.add,
-            size: 60,
-          ),
-        ),
+        Row(
+          children: [
+            CheckBoxText(name: "Failed"),
+            CheckBoxText(name: "Dead"),
+            CheckBoxText(name: "Shiny"),
+            CheckBoxText(name: "Team"),
+          ],
+        )
+      ],
+    );
+  }
+}
+
+class CheckBoxText extends StatelessWidget {
+  String name;
+  bool? active;
+  CheckBoxText({
+    required this.name,
+    //required this.active,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(name),
+        Checkbox(value: false, onChanged: (bool? value) {}),
       ],
     );
   }
