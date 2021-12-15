@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:locketrack/custom_classes/rute_class.dart';
+import 'package:locketrack/screens/coach_token.dart';
 
 class RuteScreen extends StatefulWidget {
   RuteScreen({
@@ -38,21 +39,38 @@ class _RuteScreenState extends State<RuteScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const RegionNameMap(name: "Kanto", path: "assets/kanto_map.jpg"),
-          const SizedBox(height: 10),
-          Expanded(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Pokémon Rojo Fuego"),
+      ),
+      floatingActionButton: FloatingActionButton(
+        child:
+            const Icon(Icons.backpack_outlined, size: 40, color: Colors.white),
+        backgroundColor: Colors.orange,
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const CoachToken(),
+            ),
+          );
+        },
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
               child: ListView.builder(
-                  itemCount: routes.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return RouteContainer(db: db, path: routes[index]);
-                  })),
-        ],
+                itemCount: routes.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return RouteContainer(db: db, path: routes[index]);
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -207,42 +225,5 @@ class InputText extends StatelessWidget {
         ),
       )
     ]);
-  }
-}
-
-class RegionNameMap extends StatelessWidget {
-  final String name;
-  final String path;
-  const RegionNameMap({
-    required this.name,
-    required this.path,
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          name,
-          style: const TextStyle(
-              decoration: TextDecoration.underline,
-              fontWeight: FontWeight.w700,
-              fontSize: 24),
-        ),
-        Container(
-          margin: const EdgeInsets.only(top: 5),
-          child: Image.asset(
-            path,
-            fit: BoxFit.fitHeight,
-          ),
-          clipBehavior: Clip.antiAlias,
-          decoration: const BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(30)),
-          ),
-        ),
-      ],
-    );
   }
 }

@@ -1,7 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:locketrack/screens/coach_token.dart';
-import 'package:locketrack/screens/rutes.dart';
+import 'package:locketrack/screens/select_region.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,19 +30,7 @@ class MainScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Pokémon Rojo Fuego")),
-      floatingActionButton: FloatingActionButton(
-        child:
-            const Icon(Icons.backpack_outlined, size: 40, color: Colors.white),
-        backgroundColor: Colors.orange,
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const CoachToken(),
-            ),
-          );
-        },
-      ),
-      body: RuteScreen(),
+      body: RegionNameMap(),
     );
   }
 }
