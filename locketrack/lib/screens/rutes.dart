@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:locketrack/custom_classes/rute_class.dart';
 
 class RuteScreen extends StatefulWidget {
   RuteScreen({
@@ -18,13 +19,21 @@ class _RuteScreenState extends State<RuteScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    routes = [for (int i = 0; i < 10; i++) "Hola"];
+    drawRoutes();
   }
 
   @override
   void dispose() {
     // TODO: implement dispose
     super.dispose();
+  }
+
+  void drawRoutes() {
+    db.collection("rutas").get().then((querySnapshot) {
+      querySnapshot.docs.forEach((result) {
+        routes.add(result.id);
+      });
+    });
   }
 
   @override
@@ -37,24 +46,79 @@ class _RuteScreenState extends State<RuteScreen> {
         children: [
           const RegionNameMap(name: "Kanto", path: "assets/kanto_map.jpg"),
           const SizedBox(height: 10),
-          Container(
-            child: const RouteInfo(),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.green, width: 5),
-              borderRadius: const BorderRadius.all(
-                Radius.circular(15),
-              ),
-            ),
-          ),
+          Expanded(
+              child: ListView.builder(
+                  itemCount: routes.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return RouteContainer(db: db, path: routes[index]);
+                  })),
         ],
       ),
     );
   }
 }
 
+class RouteContainer extends StatelessWidget {
+  final FirebaseFirestore db;
+  final String path;
+  const RouteContainer({
+    required this.db,
+    required this.path,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.green, width: 5),
+        borderRadius: const BorderRadius.all(
+          Radius.circular(15),
+        ),
+      ),
+      child: RouteSnapshot(db: db, path: path),
+    );
+  }
+}
+
+class RouteSnapshot extends StatelessWidget {
+  final String path;
+  const RouteSnapshot({
+    required this.path,
+    required this.db,
+    Key? key,
+  }) : super(key: key);
+
+  final FirebaseFirestore db;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+      stream: db.doc("/rutas/$path").snapshots(),
+      builder: (
+        BuildContext context,
+        AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot,
+      ) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final doc = snapshot.data!.data();
+        if (doc != null) {
+          return RouteInfo(routeName: RouteClass.fromFireBase(doc));
+        } else {
+          return const Center(child: Text("doc is null!"));
+        }
+      },
+    );
+  }
+}
+
 class RouteInfo extends StatelessWidget {
+  final RouteClass routeName;
   const RouteInfo({
+    required this.routeName,
     Key? key,
   }) : super(key: key);
 
@@ -70,7 +134,7 @@ class RouteInfo extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Route Name"),
+                  Text(routeName.routeName),
                   const SizedBox(height: 10),
                   InputText(fieldName: "Pokémon: ", name: ""),
                   const SizedBox(height: 10),
@@ -89,7 +153,7 @@ class RouteInfo extends StatelessWidget {
           ],
         ),
         Row(
-          children: [
+          children: const [
             CheckBoxText(name: "Failed"),
             CheckBoxText(name: "Dead"),
             CheckBoxText(name: "Shiny"),
@@ -102,9 +166,9 @@ class RouteInfo extends StatelessWidget {
 }
 
 class CheckBoxText extends StatelessWidget {
-  String name;
-  bool? active;
-  CheckBoxText({
+  final String name;
+  //final bool? active;
+  const CheckBoxText({
     required this.name,
     //required this.active,
     Key? key,
