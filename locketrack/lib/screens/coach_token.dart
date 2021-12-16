@@ -52,16 +52,6 @@ class _CoachTokenState extends State<CoachToken> {
               ),
             ),
           ),*/
-          ElevatedButton(
-            child: const Text("Pokedex"),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const Pokedex(),
-                ),
-              );
-            },
-          ),
         ],
       ),
     );

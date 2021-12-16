@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:locketrack/custom_classes/route.dart';
 import 'package:locketrack/screens/coach_token.dart';
 
+import 'list_pokemon.dart';
+
 class KantoScreen extends StatefulWidget {
   KantoScreen({
     Key? key,
@@ -172,16 +174,32 @@ class RouteInfo extends StatelessWidget {
                   ],
                 ),
               ),
-              Container(
-                margin: const EdgeInsets.only(left: 10),
-                padding: const EdgeInsets.all(10),
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.orange,
-                ),
-                child: Transform.rotate(
-                  angle: 180 * 3.141516 / 180,
-                  child: const Icon(Icons.catching_pokemon, size: 60),
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const Pokedex(),
+                    ),
+                  );
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(left: 10),
+                  padding: const EdgeInsets.all(10),
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.orange,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey,
+                        blurRadius: 4.0,
+                        spreadRadius: 1.0,
+                      )
+                    ],
+                  ),
+                  child: Transform.rotate(
+                    angle: 180 * 3.141516 / 180,
+                    child: const Icon(Icons.catching_pokemon, size: 60),
+                  ),
                 ),
               ),
             ],
