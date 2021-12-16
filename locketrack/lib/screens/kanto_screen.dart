@@ -142,7 +142,8 @@ class RouteSnapshot extends StatelessWidget {
 class RouteInfo extends StatelessWidget {
   final RouteClass routeInfo;
   final dynamic doc;
-  const RouteInfo({
+  final List<String> statusList = ["Finded", "Gifted", "Traded", "Egg"];
+  RouteInfo({
     required this.routeInfo,
     required this.doc,
     Key? key,
@@ -162,9 +163,14 @@ class RouteInfo extends StatelessWidget {
                 children: [
                   Text(routeInfo.routeName),
                   const SizedBox(height: 10),
-                  InputText(fieldName: "Pokémon: ", name: ""),
+                  InputText(fieldName: "Pokémon: ", name: "Pokémon"),
                   const SizedBox(height: 10),
-                  InputText(fieldName: "Status:      ", name: ""),
+                  DropdownButtonContainer(
+                      fieldName: "status",
+                      name: "Status:      ",
+                      statusList: statusList,
+                      status: routeInfo.status,
+                      doc: doc),
                 ],
               ),
             ),
@@ -188,6 +194,63 @@ class RouteInfo extends StatelessWidget {
         )
       ],
     );
+  }
+}
+
+class DropdownButtonContainer extends StatefulWidget {
+  const DropdownButtonContainer({
+    Key? key,
+    required this.statusList,
+    required this.status,
+    required this.fieldName,
+    required this.name,
+    required this.doc,
+  }) : super(key: key);
+
+  final List<String> statusList;
+  final String status;
+  final String fieldName;
+  final String name;
+  final DocumentReference<Map<String, dynamic>> doc;
+
+  @override
+  State<DropdownButtonContainer> createState() =>
+      _DropdownButtonContainerState();
+}
+
+class _DropdownButtonContainerState extends State<DropdownButtonContainer> {
+  @override
+  Widget build(BuildContext context) {
+    return Row(children: [
+      Text(widget.name),
+      Expanded(
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.white, width: 1),
+          ),
+          child: DropdownButton(
+            style: const TextStyle(color: Colors.white, fontSize: 14.0),
+            isDense: true,
+            isExpanded: true,
+            itemHeight: null,
+            items: widget.statusList
+                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                .toList(),
+            hint: Padding(
+              padding: const EdgeInsets.only(left: 4),
+              child: Text(widget.status),
+            ),
+            onChanged: (value) => {
+              setState(() {
+                widget.doc.update({
+                  widget.fieldName: value,
+                });
+              })
+            },
+          ),
+        ),
+      )
+    ]);
   }
 }
 
@@ -248,7 +311,10 @@ class InputText extends StatelessWidget {
           decoration: BoxDecoration(
             border: Border.all(color: Colors.white, width: 1),
           ),
-          child: Text(name),
+          child: Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: Text(name),
+          ),
         ),
       )
     ]);
