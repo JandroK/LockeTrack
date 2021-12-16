@@ -29,11 +29,15 @@ class _KantoScreenState extends State<KantoScreen> {
     super.dispose();
   }
 
-  void drawRoutes() {
-    db.collection("rutas").get().then((querySnapshot) {
+  void drawRoutes() async {
+    await db.collection("rutas").get().then((querySnapshot) {
       querySnapshot.docs.forEach((result) {
         routes.add(result.id);
       });
+    });
+    setState(() {
+      // Update your UI with the desired changes.
+      print("Ya he cargado los path");
     });
   }
 
