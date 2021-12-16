@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:locketrack/custom_classes/route.dart';
 import 'package:locketrack/screens/coach_token.dart';
 
+import 'list_pokemon.dart';
+
 class KantoScreen extends StatefulWidget {
   KantoScreen({
     Key? key,
@@ -50,7 +52,7 @@ class _KantoScreenState extends State<KantoScreen> {
       floatingActionButton: FloatingActionButton(
         child:
             const Icon(Icons.backpack_outlined, size: 40, color: Colors.white),
-        backgroundColor: Colors.orange,
+        backgroundColor: Colors.orange[700],
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
@@ -59,23 +61,19 @@ class _KantoScreenState extends State<KantoScreen> {
           );
         },
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: ListView.builder(
-                itemCount: routes.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return RouteSnapshot(db: db, path: routes[index]);
-                  //RouteContainer(db: db, path: routes[index]);
-                },
-              ),
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: routes.length,
+              itemBuilder: (BuildContext context, int index) {
+                return RouteSnapshot(db: db, path: routes[index]);
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -128,22 +126,30 @@ class RouteInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 6),
+      margin: const EdgeInsets.fromLTRB(12, 6, 12, 6),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(
+          Radius.circular(15),
+        ),
         border: Border.all(
           width: 5,
           color: (routeInfo.status == "")
               ? Colors.grey
               : (routeInfo.shiny)
                   ? Colors.yellow
-                  : (routeInfo.failed)
+                  : (routeInfo.failed || routeInfo.dead)
                       ? Colors.red
                       : Colors.green,
         ),
-        borderRadius: const BorderRadius.all(
-          Radius.circular(15),
-        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black38,
+            blurRadius: 5.0,
+            spreadRadius: 3.0,
+            offset: Offset(2.0, 2.0), // shadow direction: bottom right
+          )
+        ],
       ),
       child: Column(
         children: [
@@ -168,13 +174,33 @@ class RouteInfo extends StatelessWidget {
                   ],
                 ),
               ),
-              Container(
-                margin: const EdgeInsets.only(left: 10),
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.orange,
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const Pokedex(),
+                    ),
+                  );
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(left: 10),
+                  padding: const EdgeInsets.all(10),
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.orange,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey,
+                        blurRadius: 4.0,
+                        spreadRadius: 1.0,
+                      )
+                    ],
+                  ),
+                  child: Transform.rotate(
+                    angle: 180 * 3.141516 / 180,
+                    child: const Icon(Icons.catching_pokemon, size: 60),
+                  ),
                 ),
-                child: const Icon(Icons.add, size: 70),
               ),
             ],
           ),
