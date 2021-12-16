@@ -128,7 +128,9 @@ class RouteSnapshot extends StatelessWidget {
         }
         final doc = snapshot.data!.data();
         if (doc != null) {
-          return RouteInfo(routeName: RouteClass.fromFireBase(doc));
+          return RouteInfo(
+              routeInfo: RouteClass.fromFireBase(doc),
+              doc: db.doc("/rutas/$path"));
         } else {
           return const Center(child: Text("doc is null!"));
         }
@@ -138,9 +140,11 @@ class RouteSnapshot extends StatelessWidget {
 }
 
 class RouteInfo extends StatelessWidget {
-  final RouteClass routeName;
+  final RouteClass routeInfo;
+  final dynamic doc;
   const RouteInfo({
-    required this.routeName,
+    required this.routeInfo,
+    required this.doc,
     Key? key,
   }) : super(key: key);
 
@@ -156,7 +160,7 @@ class RouteInfo extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(routeName.routeName),
+                  Text(routeInfo.routeName),
                   const SizedBox(height: 10),
                   InputText(fieldName: "Pokémon: ", name: ""),
                   const SizedBox(height: 10),
@@ -175,11 +179,11 @@ class RouteInfo extends StatelessWidget {
           ],
         ),
         Row(
-          children: const [
-            CheckBoxText(name: "Failed"),
-            CheckBoxText(name: "Dead"),
-            CheckBoxText(name: "Shiny"),
-            CheckBoxText(name: "Team"),
+          children: [
+            CheckBoxText(name: "Failed", active: routeInfo.failed, doc: doc),
+            CheckBoxText(name: "Dead", active: routeInfo.dead, doc: doc),
+            CheckBoxText(name: "Shiny", active: routeInfo.shiny, doc: doc),
+            CheckBoxText(name: "Team", active: routeInfo.team, doc: doc),
           ],
         )
       ],
@@ -187,21 +191,40 @@ class RouteInfo extends StatelessWidget {
   }
 }
 
-class CheckBoxText extends StatelessWidget {
+class CheckBoxText extends StatefulWidget {
   final String name;
+  final DocumentReference<Map<String, dynamic>> doc;
+  bool active;
   //final bool? active;
-  const CheckBoxText({
+  CheckBoxText({
     required this.name,
+    required this.doc,
+    required this.active,
     //required this.active,
     Key? key,
   }) : super(key: key);
 
   @override
+  State<CheckBoxText> createState() => _CheckBoxTextState();
+}
+
+class _CheckBoxTextState extends State<CheckBoxText> {
+  @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(name),
-        Checkbox(value: false, onChanged: (bool? value) {}),
+        Text(widget.name),
+        Checkbox(
+          value: widget.active,
+          onChanged: (bool? value) {
+            setState(() {
+              widget.doc.update({
+                '${widget.name[0].toLowerCase()}${widget.name.substring(1)}':
+                    value!,
+              });
+            });
+          },
+        ),
       ],
     );
   }
