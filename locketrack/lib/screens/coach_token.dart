@@ -57,7 +57,7 @@ class _CoachTokenState extends State<CoachToken> {
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => const Pokedex(),
+                  builder: (context) => Pokedex(),
                 ),
               );
             },
