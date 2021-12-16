@@ -69,38 +69,14 @@ class _KantoScreenState extends State<KantoScreen> {
               child: ListView.builder(
                 itemCount: routes.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return RouteContainer(db: db, path: routes[index]);
+                  return RouteSnapshot(db: db, path: routes[index]);
+                  //RouteContainer(db: db, path: routes[index]);
                 },
               ),
             ),
           ],
         ),
       ),
-    );
-  }
-}
-
-class RouteContainer extends StatelessWidget {
-  final FirebaseFirestore db;
-  final String path;
-  const RouteContainer({
-    required this.db,
-    required this.path,
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.green, width: 5),
-        borderRadius: const BorderRadius.all(
-          Radius.circular(15),
-        ),
-      ),
-      child: RouteSnapshot(db: db, path: path),
     );
   }
 }
@@ -151,48 +127,67 @@ class RouteInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(routeInfo.routeName),
-                  const SizedBox(height: 10),
-                  InputText(fieldName: "Pokémon: ", name: "Pokémon"),
-                  const SizedBox(height: 10),
-                  DropdownButtonContainer(
-                      fieldName: "status",
-                      name: "Status:      ",
-                      statusList: statusList,
-                      status: routeInfo.status,
-                      doc: doc),
-                ],
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.only(left: 10),
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.orange,
-              ),
-              child: const Icon(Icons.add, size: 70),
-            ),
-          ],
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: Border.all(
+          width: 5,
+          color: (routeInfo.status == "")
+              ? Colors.grey
+              : (routeInfo.shiny)
+                  ? Colors.yellow
+                  : (routeInfo.failed)
+                      ? Colors.red
+                      : Colors.green,
         ),
-        Row(
-          children: [
-            CheckBoxText(name: "Failed", active: routeInfo.failed, doc: doc),
-            CheckBoxText(name: "Dead", active: routeInfo.dead, doc: doc),
-            CheckBoxText(name: "Shiny", active: routeInfo.shiny, doc: doc),
-            CheckBoxText(name: "Team", active: routeInfo.team, doc: doc),
-          ],
-        )
-      ],
+        borderRadius: const BorderRadius.all(
+          Radius.circular(15),
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(routeInfo.routeName),
+                    const SizedBox(height: 10),
+                    InputText(fieldName: "Pokémon: ", name: "Pokémon"),
+                    const SizedBox(height: 10),
+                    DropdownButtonContainer(
+                        fieldName: "status",
+                        name: "Status:      ",
+                        statusList: statusList,
+                        status: routeInfo.status,
+                        doc: doc),
+                  ],
+                ),
+              ),
+              Container(
+                margin: const EdgeInsets.only(left: 10),
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.orange,
+                ),
+                child: const Icon(Icons.add, size: 70),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              CheckBoxText(name: "Failed", active: routeInfo.failed, doc: doc),
+              CheckBoxText(name: "Dead", active: routeInfo.dead, doc: doc),
+              CheckBoxText(name: "Shiny", active: routeInfo.shiny, doc: doc),
+              CheckBoxText(name: "Team", active: routeInfo.team, doc: doc),
+            ],
+          )
+        ],
+      ),
     );
   }
 }
@@ -278,6 +273,7 @@ class _CheckBoxTextState extends State<CheckBoxText> {
       children: [
         Text(widget.name),
         Checkbox(
+          activeColor: Colors.orange,
           value: widget.active,
           onChanged: (bool? value) {
             setState(() {
