@@ -24,7 +24,7 @@ class _PokedexState extends State<Pokedex> {
     });
     setState(() {
       // Update your UI with the desired changes.
-      print("Ya he cargado los path");
+      print("Load Route info");
     });
   }
 
@@ -32,7 +32,7 @@ class _PokedexState extends State<Pokedex> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Pokémon Rojo Fuego"),
+        title: const Text("Pokédex"),
       ),
       body: Column(
         children: [
@@ -45,51 +45,67 @@ class _PokedexState extends State<Pokedex> {
             ),
           ),
           Card(
+            child: TextButton(
+              style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.white)),
+              onPressed: () {},
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: const [
+                            Text("#NUM"),
+                            SizedBox(height: 10),
+                            Text("Pokémon: Name "),
+                          ],
+                        ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            ContainerType("Type"),
+                            ContainerType("Type"),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(left: 10),
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.orange,
+                    ),
+                    child: Transform.rotate(
+                        angle: 180 * math.pi / 180,
+                        child: const Icon(Icons.catching_pokemon_rounded,
+                            size: 70)),
+                  ),
+                ],
+              ),
+            ),
             margin: EdgeInsets.all(20),
             elevation: 12,
-            child: Column(
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text("#"),
-                          SizedBox(height: 10),
-                          Text("Pokémon: "),
-                          SizedBox(height: 10),
-                          Text("Status:  "),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(left: 10),
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.orange,
-                      ),
-                      child: Transform.rotate(
-                          angle: 180 * math.pi / 180,
-                          child: const Icon(Icons.catching_pokemon_rounded,
-                              size: 70)),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: const [
-                    Text("Failed"),
-                    Text("Dead"),
-                    Text("Shiny"),
-                    Text("Team"),
-                  ],
-                )
-              ],
-            ),
           )
         ],
+      ),
+    );
+  }
+
+  Container ContainerType(String type) {
+    return Container(
+      child: Text(type),
+      margin: const EdgeInsets.only(left: 10),
+      decoration: BoxDecoration(
+        shape: BoxShape.rectangle,
+        border: Border.all(color: Colors.white, width: 1),
       ),
     );
   }
