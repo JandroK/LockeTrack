@@ -32,23 +32,28 @@ class RegionNameMap extends StatelessWidget {
           child: ListView.builder(
             itemCount: path.length,
             itemBuilder: (BuildContext context, int index) {
-              return GestureDetector(
-                onTap: () {
-                  // Temporal condition, when all region have screen it will not be necessary
-                  if (regionScreens[index] != null) {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                          builder: (context) => regionScreens[index]),
-                    );
-                  }
-                },
-                child: Container(
-                  child: Image.asset("assets/maps/${path[index]}",
-                      fit: BoxFit.fitHeight),
-                  margin: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-                  clipBehavior: Clip.antiAlias,
-                  decoration: const BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(30)),
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+                child: Ink(
+                  height: 150,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(25),
+                    image: DecorationImage(
+                      image: AssetImage("assets/maps/${path[index]}"),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  child: InkWell(
+                    borderRadius: const BorderRadius.all(Radius.circular(25)),
+                    onTap: () {
+                      // Temporal condition, when all region have screen it will not be necessary
+                      if (regionScreens[index] != null) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (context) => regionScreens[index]),
+                        );
+                      }
+                    },
                   ),
                 ),
               );
