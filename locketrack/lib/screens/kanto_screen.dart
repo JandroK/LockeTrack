@@ -22,7 +22,7 @@ class _KantoScreenState extends State<KantoScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    generateNewDoc(db.collection("rutas"), "Starter");
+    generateNewDoc(db.collection("rutas"), kantoRouteList);
     //drawRoutes();
   }
 
@@ -32,23 +32,23 @@ class _KantoScreenState extends State<KantoScreen> {
     super.dispose();
   }
 
-  void generateNewDoc(
-      CollectionReference<Map<String, dynamic>> collection, String routeName) {
-    collection.get().then((value) async {
-      if (value.size == 0) {
-        await collection.add({
-          'nombre': routeName,
-          //'pokemon': "pokemons/zQDOtXNvVNXrRc9iKCNa",
-          'status': "",
-          'failed': false,
-          'dead': false,
-          'shiny': false,
-          'team': false
-        }).then((value) => drawRoutes());
-      } else {
-        drawRoutes();
+  void generateNewDoc(CollectionReference<Map<String, dynamic>> collection,
+      List<String> routeName) {
+    collection.get().then((value) {
+      if (value.size == 1) {
+        routeName.forEach((element) async {
+          await collection.add({
+            'nombre': element,
+            //'pokemon': "pokemons/zQDOtXNvVNXrRc9iKCNa",
+            'status': "",
+            'failed': false,
+            'dead': false,
+            'shiny': false,
+            'team': false
+          });
+        });
       }
-    });
+    }).then((value) => drawRoutes());
   }
 
   void drawRoutes() async {
