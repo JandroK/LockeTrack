@@ -61,20 +61,22 @@ class _KantoScreenState extends State<KantoScreen> {
           );
         },
       ),
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: routes.length,
-              itemBuilder: (BuildContext context, int index) {
-                return RouteSnapshot(db: db, path: routes[index]);
-              },
+      body: (routes.isEmpty)
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: routes.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return RouteSnapshot(db: db, path: routes[index]);
+                    },
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -98,7 +100,10 @@ class RouteSnapshot extends StatelessWidget {
         AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot,
       ) {
         if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+          return const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Center(child: CircularProgressIndicator()),
+          );
         }
         final doc = snapshot.data!.data();
         if (doc != null) {
