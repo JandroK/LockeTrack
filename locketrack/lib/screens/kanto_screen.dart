@@ -22,13 +22,33 @@ class _KantoScreenState extends State<KantoScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    drawRoutes();
+    generateNewDoc(db.collection("rutas"), "Starter");
+    //drawRoutes();
   }
 
   @override
   void dispose() {
     // TODO: implement dispose
     super.dispose();
+  }
+
+  void generateNewDoc(
+      CollectionReference<Map<String, dynamic>> collection, String routeName) {
+    collection.get().then((value) async {
+      if (value.size == 0) {
+        await collection.add({
+          'nombre': routeName,
+          //'pokemon': "pokemons/zQDOtXNvVNXrRc9iKCNa",
+          'status': "",
+          'failed': false,
+          'dead': false,
+          'shiny': false,
+          'team': false
+        }).then((value) => drawRoutes());
+      } else {
+        drawRoutes();
+      }
+    });
   }
 
   void drawRoutes() async {
