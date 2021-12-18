@@ -22,45 +22,45 @@ class RegionNameMap extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const SizedBox(height: 10),
-        const Text("Select Region",
-            style: TextStyle(
-                decoration: TextDecoration.underline,
-                fontWeight: FontWeight.w700,
-                fontSize: 24)),
         Expanded(
-          child: ListView.builder(
-            itemCount: path.length,
-            itemBuilder: (BuildContext context, int index) {
-              return Padding(
-                padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-                child: Ink(
-                  height: 150,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(25),
-                    image: DecorationImage(
-                      image: AssetImage("assets/maps/${path[index]}"),
-                      fit: BoxFit.cover,
+          child: ListView(
+            children: [
+              const SizedBox(height: 10),
+              const Text("Select Region",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      decoration: TextDecoration.underline,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 24)),
+              const SizedBox(height: 5),
+              for (int i = 0; i < path.length; i++)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+                  child: Ink(
+                    height: 150,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(25),
+                      image: DecorationImage(
+                        image: AssetImage("assets/maps/${path[i]}"),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    child: InkWell(
+                      borderRadius: const BorderRadius.all(Radius.circular(25)),
+                      onTap: () {
+                        // Temporal condition, when all region have screen it will not be necessary
+                        if (regionScreens[i] != null) {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => regionScreens[i]));
+                        }
+                      },
                     ),
                   ),
-                  child: InkWell(
-                    borderRadius: const BorderRadius.all(Radius.circular(25)),
-                    onTap: () {
-                      // Temporal condition, when all region have screen it will not be necessary
-                      if (regionScreens[index] != null) {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                              builder: (context) => regionScreens[index]),
-                        );
-                      }
-                    },
-                  ),
                 ),
-              );
-            },
+              const SizedBox(height: 10)
+            ],
           ),
-        ),
-        const SizedBox(height: 10)
+        )
       ],
     );
   }
