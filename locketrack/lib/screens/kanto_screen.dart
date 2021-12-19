@@ -36,6 +36,7 @@ class _KantoScreenState extends State<KantoScreen> {
       List<String> routeName) {
     collection.get().then((value) {
       if (value.size == 1) {
+        int i = 0;
         routeName.forEach((element) async {
           await collection.add({
             'nombre': element,
@@ -44,7 +45,8 @@ class _KantoScreenState extends State<KantoScreen> {
             'failed': false,
             'dead': false,
             'shiny': false,
-            'team': false
+            'team': false,
+            'index': i++,
           });
         });
       }
@@ -52,7 +54,7 @@ class _KantoScreenState extends State<KantoScreen> {
   }
 
   void drawRoutes() async {
-    await db.collection("rutas").get().then((querySnapshot) {
+    await db.collection("rutas").orderBy("index").get().then((querySnapshot) {
       querySnapshot.docs.forEach((result) {
         routes.add(result.id);
       });
@@ -152,7 +154,7 @@ class RouteInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.fromLTRB(12, 6, 12, 6),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.fromLTRB(12, 5, 12, 4),
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.all(
           Radius.circular(15),
@@ -179,6 +181,25 @@ class RouteInfo extends StatelessWidget {
       child: Column(
         children: [
           Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Text(
+                  routeInfo.routeName,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+              GestureDetector(
+                child: const Icon(Icons.settings_backup_restore_rounded),
+                onTap: () {
+                  resetValues(doc);
+                },
+              ),
+            ],
+          ),
+          Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
@@ -186,9 +207,8 @@ class RouteInfo extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(routeInfo.routeName),
                     const SizedBox(height: 10),
-                    InputText(fieldName: "Pokémon: ", name: "Pokémon"),
+                    InputText(fieldName: "Pokémon: ", name: ""),
                     const SizedBox(height: 10),
                     DropdownButtonContainer(
                         fieldName: "status",

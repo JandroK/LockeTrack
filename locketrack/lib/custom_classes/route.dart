@@ -19,6 +19,17 @@ class RouteClass {
         team = doc['team'];
 }
 
+void resetValues(DocumentReference<Map<String, dynamic>> doc) {
+  doc.update({
+    //'pokemon' "pokemons/zQDOtXNvVNXrRc9iKCNa":
+    'status': "",
+    'failed': false,
+    'dead': false,
+    'shiny': false,
+    'team': false,
+  });
+}
+
 List<String> kantoRouteList = [
   "Starter",
   "Pueblo Paleta",
