@@ -5,25 +5,28 @@ import 'package:locketrack/screens/coach_token.dart';
 
 import 'list_pokemon.dart';
 
-class KantoScreen extends StatefulWidget {
-  KantoScreen({
+class RouteScreen extends StatefulWidget {
+  final String docID;
+  RouteScreen({
+    required this.docID,
     Key? key,
   }) : super(key: key);
 
   @override
-  State<KantoScreen> createState() => _KantoScreenState();
+  State<RouteScreen> createState() => _RouteScreenState();
 }
 
-class _KantoScreenState extends State<KantoScreen> {
-  final db = FirebaseFirestore.instance;
+class _RouteScreenState extends State<RouteScreen> {
+  late DocumentReference<Map<String, dynamic>> db;
+  late String gameName;
   List<String> routes = [];
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    generateNewDoc(db.collection("rutas"), kantoRouteList);
-    //drawRoutes();
+    db = FirebaseFirestore.instance.collection("regions").doc(widget.docID);
+    generateNewDoc(db.collection("routes"), kantoRouteList);
   }
 
   @override
@@ -54,13 +57,12 @@ class _KantoScreenState extends State<KantoScreen> {
   }
 
   void drawRoutes() async {
-    await db.collection("rutas").orderBy("index").get().then((querySnapshot) {
+    await db.collection("routes").orderBy("index").get().then((querySnapshot) {
       querySnapshot.docs.forEach((result) {
         routes.add(result.id);
       });
     });
     setState(() {
-      // Update your UI with the desired changes.
       print("Ya he cargado los path");
     });
   }
@@ -111,12 +113,12 @@ class RouteSnapshot extends StatelessWidget {
     Key? key,
   }) : super(key: key);
 
-  final FirebaseFirestore db;
+  final DocumentReference<Map<String, dynamic>> db;
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: db.doc("/rutas/$path").snapshots(),
+      stream: db.collection("routes").doc(path).snapshots(),
       builder: (
         BuildContext context,
         AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot,
@@ -131,7 +133,7 @@ class RouteSnapshot extends StatelessWidget {
         if (doc != null) {
           return RouteInfo(
               routeInfo: RouteClass.fromFireBase(doc),
-              doc: db.doc("/rutas/$path"));
+              doc: db.collection("routes").doc(path));
         } else {
           return const Center(child: Text("doc is null!"));
         }
