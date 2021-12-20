@@ -19,6 +19,22 @@ class RouteClass {
         team = doc['team'];
 }
 
+void deleteRegion(String path, dynamic function) async {
+  await FirebaseFirestore.instance
+      .collection("regions")
+      .doc(path)
+      .collection("routes")
+      .get()
+      .then(
+        (value) => value.docs.forEach(
+          (element) {
+            element.reference.delete();
+          },
+        ),
+      )
+      .then((value) => function);
+}
+
 void resetValues(DocumentReference<Map<String, dynamic>> doc) {
   doc.update({
     //'pokemon' "pokemons/zQDOtXNvVNXrRc9iKCNa":

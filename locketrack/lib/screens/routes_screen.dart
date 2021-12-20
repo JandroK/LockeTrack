@@ -26,7 +26,7 @@ class _RouteScreenState extends State<RouteScreen> {
     // TODO: implement initState
     super.initState();
     db = FirebaseFirestore.instance.collection("regions").doc(widget.docID);
-    generateNewDoc(db.collection("routes"), kantoRouteList);
+    generateRoutes(db.collection("routes"), kantoRouteList, widget.docID);
     getGameName(db);
   }
 
@@ -40,8 +40,8 @@ class _RouteScreenState extends State<RouteScreen> {
     await doc.get().then((value) => gameName = value.data()?["name"]);
   }
 
-  void generateNewDoc(CollectionReference<Map<String, dynamic>> collection,
-      List<String> routeName) {
+  void generateRoutes(CollectionReference<Map<String, dynamic>> collection,
+      List<String> routeName, String path) {
     collection.get().then((value) {
       if (value.size == 1) {
         int i = 0;

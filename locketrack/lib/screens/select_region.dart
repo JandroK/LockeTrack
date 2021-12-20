@@ -15,6 +15,16 @@ class _RegionNameMapState extends State<RegionNameMap> {
   final db = FirebaseFirestore.instance;
 
   final List<String> regions = [];
+  final List<String> nameGames = [
+    "FireRed and LeafGreen",
+    "Gold and Silver",
+    "Ruby and Sapphire",
+    "Diamond and Pearl",
+    "Black and White",
+    "X and Y",
+    "Sun and Moon",
+    "Sword and Shield"
+  ];
   final List<String> imagePath = [
     "kanto_map.png",
     "johto_map.png",
@@ -30,7 +40,35 @@ class _RegionNameMapState extends State<RegionNameMap> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    loadRegions();
+    generateRegions(db.collection("regions"), nameGames);
+  }
+
+  void deleteRegion(String path) async {
+    await FirebaseFirestore.instance
+        .collection("regions")
+        .doc(path)
+        .collection("routes")
+        .get()
+        .then((value) => value.docs.forEach((element) {
+              element.reference.delete();
+            }))
+        .then((value) => FirebaseFirestore.instance
+            .collection("regions")
+            .doc(path)
+            .collection("routes")
+            .add({"name": "dafault"}));
+  }
+
+  void generateRegions(CollectionReference<Map<String, dynamic>> collection,
+      List<String> nameGames) {
+    collection.get().then((value) {
+      if (value.size == 1) {
+        int i = 1;
+        nameGames.forEach((element) async {
+          await collection.add({'gen': i++, 'name': element});
+        });
+      }
+    }).then((value) => loadRegions());
   }
 
   void loadRegions() async {
@@ -80,7 +118,7 @@ class _RegionNameMapState extends State<RegionNameMap> {
                               padding: const EdgeInsets.all(8.0),
                               child: GestureDetector(
                                 onTap: () {
-                                  print("objectTTTTTTTTTTTTT");
+                                  deleteRegion(regions[i]);
                                 },
                                 child: const Align(
                                     alignment: Alignment.topRight,
