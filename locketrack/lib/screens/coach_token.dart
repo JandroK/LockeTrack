@@ -21,7 +21,7 @@ class _CoachTokenState extends State<CoachToken> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    db = FirebaseFirestore.instance.collection("regions").doc(widget().docID);
+    db = FirebaseFirestore.instance.collection("regions").doc(widget.docID);
     loadMedals();
   }
 
