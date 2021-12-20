@@ -7,8 +7,10 @@ import 'list_pokemon.dart';
 
 class RouteScreen extends StatefulWidget {
   final String docID;
+  final List<String> routesList;
   RouteScreen({
     required this.docID,
+    required this.routesList,
     Key? key,
   }) : super(key: key);
 
@@ -19,14 +21,14 @@ class RouteScreen extends StatefulWidget {
 class _RouteScreenState extends State<RouteScreen> {
   late DocumentReference<Map<String, dynamic>> db;
   late String gameName = "";
-  List<String> routes = [];
+  List<String> routesID = [];
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     db = FirebaseFirestore.instance.collection("regions").doc(widget.docID);
-    generateRoutes(db.collection("routes"), kantoRouteList, widget.docID);
+    generateRoutes(db.collection("routes"), widget.routesList, widget.docID);
     getGameName(db);
   }
 
@@ -43,7 +45,7 @@ class _RouteScreenState extends State<RouteScreen> {
   void generateRoutes(CollectionReference<Map<String, dynamic>> collection,
       List<String> routeName, String path) {
     collection.get().then((value) {
-      if (value.size == 1) {
+      if (value.size == 0) {
         int i = 0;
         routeName.forEach((element) async {
           await collection.add({
@@ -64,7 +66,7 @@ class _RouteScreenState extends State<RouteScreen> {
   void drawRoutes() async {
     await db.collection("routes").orderBy("index").get().then((querySnapshot) {
       querySnapshot.docs.forEach((result) {
-        routes.add(result.id);
+        routesID.add(result.id);
       });
     });
     setState(() {
@@ -92,7 +94,7 @@ class _RouteScreenState extends State<RouteScreen> {
           );
         },
       ),
-      body: (routes.isEmpty)
+      body: (routesID.isEmpty)
           ? const Center(child: CircularProgressIndicator())
           : Column(
               mainAxisSize: MainAxisSize.min,
@@ -100,9 +102,9 @@ class _RouteScreenState extends State<RouteScreen> {
               children: [
                 Expanded(
                   child: ListView.builder(
-                    itemCount: routes.length,
+                    itemCount: routesID.length,
                     itemBuilder: (BuildContext context, int index) {
-                      return RouteSnapshot(db: db, path: routes[index]);
+                      return RouteSnapshot(db: db, path: routesID[index]);
                     },
                   ),
                 ),

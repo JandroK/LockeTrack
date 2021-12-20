@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:locketrack/custom_classes/route.dart';
 import 'package:locketrack/screens/routes_screen.dart';
 
 class RegionNameMap extends StatefulWidget {
@@ -49,14 +50,13 @@ class _RegionNameMapState extends State<RegionNameMap> {
         .doc(path)
         .collection("routes")
         .get()
-        .then((value) => value.docs.forEach((element) {
+        .then(
+          (value) => value.docs.forEach(
+            (element) {
               element.reference.delete();
-            }))
-        .then((value) => FirebaseFirestore.instance
-            .collection("regions")
-            .doc(path)
-            .collection("routes")
-            .add({"name": "dafault"}));
+            },
+          ),
+        );
   }
 
   void generateRegions(CollectionReference<Map<String, dynamic>> collection,
@@ -133,10 +133,14 @@ class _RegionNameMapState extends State<RegionNameMap> {
                                 const BorderRadius.all(Radius.circular(25)),
                             onTap: () {
                               // Temporal condition, when all region have routes it will not be necessary
-                              if (i == 0) {
-                                Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (context) =>
-                                        RouteScreen(docID: regions[i])));
+                              if (i < 5) {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => RouteScreen(
+                                        docID: regions[i],
+                                        routesList: regionRouteList[i]),
+                                  ),
+                                );
                               }
                             },
                           ),
