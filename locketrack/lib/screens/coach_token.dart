@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:locketrack/custom_classes/medal.dart';
 import 'package:locketrack/screens/list_pokemon.dart';
 
 class CoachToken extends StatefulWidget {
+  final String docID;
   const CoachToken({
+    required this.docID,
     Key? key,
   }) : super(key: key);
 
@@ -13,15 +14,32 @@ class CoachToken extends StatefulWidget {
 }
 
 class _CoachTokenState extends State<CoachToken> {
-  final db = FirebaseFirestore.instance;
-  List<Medal> medals = [];
+  late DocumentReference<Map<String, dynamic>> db;
+  List<String> medals = [];
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    // TODO: cargar los datos del servidor
-    medals = [for (int i = 0; i < 8; i++) Medal((i < 3) ? true : false)];
+    db = FirebaseFirestore.instance.collection("regions").doc(widget().docID);
+    loadMedals();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
+
+  void loadMedals() async {
+    await db.collection("medals").orderBy("index").get().then((querySnapshot) {
+      querySnapshot.docs.forEach((result) {
+        medals.add(result.id);
+      });
+    });
+    setState(() {
+      print("Ya he cargado los path");
+    });
   }
 
   @override
@@ -35,25 +53,51 @@ class _CoachTokenState extends State<CoachToken> {
         children: [
           Row(
             children: [
-              for (var i in medals)
+              for (int i = 0; i < medals.length; i++)
                 Expanded(
-                    child: Image(
-                        image: AssetImage(
-                            i.gained ? i.image_gained : i.image_default))),
+                  child: MedalSnapshot(db: db, path: medals[i]),
+                ),
             ],
           ),
-          /*ListView(
-            children: List.generate(
-              8,
-              (index) => Container(
-                width: 10,
-                height: 10,
-                decoration: const BoxDecoration(color: Colors.green),
-              ),
-            ),
-          ),*/
         ],
       ),
+    );
+  }
+}
+
+class MedalSnapshot extends StatelessWidget {
+  final String path;
+  const MedalSnapshot({
+    required this.path,
+    required this.db,
+    Key? key,
+  }) : super(key: key);
+
+  final DocumentReference<Map<String, dynamic>> db;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+      stream: db.collection("medals").doc(path).snapshots(),
+      builder: (
+        BuildContext context,
+        AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot,
+      ) {
+        if (!snapshot.hasData) {
+          return const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+        final doc = snapshot.data!.data();
+        if (doc != null) {
+          return Image(
+            image: AssetImage("assets/" + doc["image"]),
+          );
+        } else {
+          return const Center(child: Text("doc is null!"));
+        }
+      },
     );
   }
 }

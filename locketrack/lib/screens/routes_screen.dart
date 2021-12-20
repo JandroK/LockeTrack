@@ -25,7 +25,7 @@ class _RouteScreenState extends State<RouteScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    db = FirebaseFirestore.instance.collection("regions").doc(widget.docID);
+    db = FirebaseFirestore.instance.collection("regions").doc(widget().docID);
     generateNewDoc(db.collection("routes"), kantoRouteList);
     getGameName(db);
   }
@@ -85,7 +85,9 @@ class _RouteScreenState extends State<RouteScreen> {
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => const CoachToken(),
+              builder: (context) => CoachToken(
+                docID: widget().docID,
+              ),
             ),
           );
         },
@@ -295,7 +297,7 @@ class _DropdownButtonContainerState extends State<DropdownButtonContainer> {
   @override
   Widget build(BuildContext context) {
     return Row(children: [
-      Text(widget.name),
+      Text(widget().name),
       Expanded(
         child: Container(
           decoration: BoxDecoration(
@@ -306,17 +308,18 @@ class _DropdownButtonContainerState extends State<DropdownButtonContainer> {
             isDense: true,
             isExpanded: true,
             itemHeight: null,
-            items: widget.statusList
+            items: widget()
+                .statusList
                 .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                 .toList(),
             hint: Padding(
               padding: const EdgeInsets.only(left: 4),
-              child: Text(widget.status),
+              child: Text(widget().status),
             ),
             onChanged: (value) => {
               setState(() {
-                widget.doc.update({
-                  widget.fieldName: value,
+                widget().doc.update({
+                  widget().fieldName: value,
                 });
               })
             },
@@ -349,14 +352,14 @@ class _CheckBoxTextState extends State<CheckBoxText> {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(widget.name),
+        Text(widget().name),
         Checkbox(
           activeColor: Colors.orange,
-          value: widget.active,
+          value: widget().active,
           onChanged: (bool? value) {
             setState(() {
-              widget.doc.update({
-                '${widget.name[0].toLowerCase()}${widget.name.substring(1)}':
+              widget().doc.update({
+                '${widget().name[0].toLowerCase()}${widget().name.substring(1)}':
                     value!,
               });
             });
