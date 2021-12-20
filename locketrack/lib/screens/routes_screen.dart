@@ -18,7 +18,7 @@ class RouteScreen extends StatefulWidget {
 
 class _RouteScreenState extends State<RouteScreen> {
   late DocumentReference<Map<String, dynamic>> db;
-  late String gameName;
+  late String gameName = "";
   List<String> routes = [];
 
   @override
@@ -27,12 +27,17 @@ class _RouteScreenState extends State<RouteScreen> {
     super.initState();
     db = FirebaseFirestore.instance.collection("regions").doc(widget.docID);
     generateNewDoc(db.collection("routes"), kantoRouteList);
+    getGameName(db);
   }
 
   @override
   void dispose() {
     // TODO: implement dispose
     super.dispose();
+  }
+
+  void getGameName(DocumentReference<Map<String, dynamic>> doc) async {
+    await doc.get().then((value) => gameName = value.data()?["name"]);
   }
 
   void generateNewDoc(CollectionReference<Map<String, dynamic>> collection,
@@ -71,7 +76,7 @@ class _RouteScreenState extends State<RouteScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Pokémon Rojo Fuego"),
+        title: (gameName != "") ? Text("Pokémon $gameName") : Text(""),
       ),
       floatingActionButton: FloatingActionButton(
         child:
