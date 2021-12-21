@@ -137,8 +137,7 @@ class _RegionNameMapState extends State<RegionNameMap> {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (context) => RouteScreen(
-                                        docID: regions[i],
-                                        routesList: regionRouteList[i]),
+                                        docID: regions[i], index: i),
                                   ),
                                 );
                               }

@@ -4,8 +4,10 @@ import 'package:locketrack/screens/list_pokemon.dart';
 
 class CoachToken extends StatefulWidget {
   final String docID;
+  final List<String> medalsList;
   const CoachToken({
     required this.docID,
+    required this.medalsList,
     Key? key,
   }) : super(key: key);
 
@@ -22,13 +24,28 @@ class _CoachTokenState extends State<CoachToken> {
     // TODO: implement initState
     super.initState();
     db = FirebaseFirestore.instance.collection("regions").doc(widget.docID);
-    loadMedals();
+    generateMedals(db.collection("medals"), widget.medalsList, widget.docID);
   }
 
   @override
   void dispose() {
     // TODO: implement dispose
     super.dispose();
+  }
+
+  void generateMedals(CollectionReference<Map<String, dynamic>> collection,
+      List<String> medalName, String path) {
+    collection.get().then((value) {
+      if (value.size == 0) {
+        int i = 1;
+        medalName.forEach((element) async {
+          await collection.add({
+            'name': element,
+            'index': i++,
+          });
+        });
+      }
+    }).then((value) => loadMedals());
   }
 
   void loadMedals() async {
@@ -53,7 +70,15 @@ class _CoachTokenState extends State<CoachToken> {
         children: [
           Row(
             children: [
-              for (int i = 0; i < medals.length; i++)
+              for (int i = 0; i < medals.length / 2; i++)
+                Expanded(
+                  child: MedalSnapshot(db: db, path: medals[i]),
+                ),
+            ],
+          ),
+          Row(
+            children: [
+              for (int i = 4; i < medals.length; i++)
                 Expanded(
                   child: MedalSnapshot(db: db, path: medals[i]),
                 ),
@@ -92,7 +117,7 @@ class MedalSnapshot extends StatelessWidget {
         final doc = snapshot.data!.data();
         if (doc != null) {
           return Image(
-            image: AssetImage("assets/" + doc["image"]),
+            image: AssetImage("assets/" + doc["name"] + ".png"),
           );
         } else {
           return const Center(child: Text("doc is null!"));

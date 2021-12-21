@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:locketrack/custom_classes/medal.dart';
 import 'package:locketrack/custom_classes/route.dart';
 import 'package:locketrack/screens/coach_token.dart';
 
@@ -7,10 +8,10 @@ import 'list_pokemon.dart';
 
 class RouteScreen extends StatefulWidget {
   final String docID;
-  final List<String> routesList;
+  final int index;
   RouteScreen({
     required this.docID,
-    required this.routesList,
+    required this.index,
     Key? key,
   }) : super(key: key);
 
@@ -28,7 +29,8 @@ class _RouteScreenState extends State<RouteScreen> {
     // TODO: implement initState
     super.initState();
     db = FirebaseFirestore.instance.collection("regions").doc(widget.docID);
-    generateRoutes(db.collection("routes"), widget.routesList, widget.docID);
+    generateRoutes(
+        db.collection("routes"), regionRouteList[widget.index], widget.docID);
     getGameName(db);
   }
 
@@ -89,6 +91,7 @@ class _RouteScreenState extends State<RouteScreen> {
             MaterialPageRoute(
               builder: (context) => CoachToken(
                 docID: widget.docID,
+                medalsList: regionMedalList[widget.index],
               ),
             ),
           );
