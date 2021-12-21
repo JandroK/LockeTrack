@@ -17,6 +17,8 @@ class CoachToken extends StatefulWidget {
 
 class _CoachTokenState extends State<CoachToken> {
   late DocumentReference<Map<String, dynamic>> db;
+  late int lives = 10;
+  late int medalCount = 0;
   List<String> medals = [];
 
   @override
@@ -25,6 +27,7 @@ class _CoachTokenState extends State<CoachToken> {
     super.initState();
     db = FirebaseFirestore.instance.collection("regions").doc(widget.docID);
     generateMedals(db.collection("medals"), widget.medalsList, widget.docID);
+    getCoachInfo(db);
   }
 
   @override
@@ -59,11 +62,16 @@ class _CoachTokenState extends State<CoachToken> {
     });
   }
 
+  void getCoachInfo(DocumentReference<Map<String, dynamic>> doc) async {
+    await doc.get().then((value) => lives = value.data()?["lives"]);
+    await doc.get().then((value) => medalCount = value.data()?["medals"]);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Pokémon Rojo Fuego"),
+        title: const Text("Locke Progression"),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -72,7 +80,12 @@ class _CoachTokenState extends State<CoachToken> {
             children: [
               for (int i = 0; i < medals.length / 2; i++)
                 Expanded(
-                  child: MedalSnapshot(db: db, path: medals[i]),
+                  child: MedalSnapshot(
+                    db: db,
+                    path: medals[i],
+                    index: i,
+                    medalCount: medalCount,
+                  ),
                 ),
             ],
           ),
@@ -80,7 +93,59 @@ class _CoachTokenState extends State<CoachToken> {
             children: [
               for (int i = 4; i < medals.length; i++)
                 Expanded(
-                  child: MedalSnapshot(db: db, path: medals[i]),
+                  child: MedalSnapshot(
+                      db: db,
+                      path: medals[i],
+                      index: i,
+                      medalCount: medalCount),
+                ),
+            ],
+          ),
+          Row(
+            children: [
+              for (int i = 0; i < 5; i++)
+                Expanded(
+                  child: (i > lives - 1)
+                      ? const ColorFiltered(
+                          colorFilter: ColorFilter.mode(
+                              Colors.black38, BlendMode.modulate),
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Image(
+                              image: AssetImage("assets/heart.png"),
+                            ),
+                          ),
+                        )
+                      : Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: const Image(
+                            image: AssetImage("assets/heart.png"),
+                          ),
+                        ),
+                ),
+            ],
+          ),
+          Row(
+            children: [
+              for (int i = 5; i < 10; i++)
+                Expanded(
+                  child: (i > lives - 1)
+                      ? const ColorFiltered(
+                          colorFilter: ColorFilter.mode(
+                              Colors.black38, BlendMode.modulate),
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Image(
+                              image: AssetImage("assets/heart.png"),
+                            ),
+                          ),
+                        )
+                      : Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: const Image(
+                            image: AssetImage("assets/heart.png"),
+                          ),
+                        ),
                 ),
             ],
           ),
@@ -92,8 +157,12 @@ class _CoachTokenState extends State<CoachToken> {
 
 class MedalSnapshot extends StatelessWidget {
   final String path;
+  final int index;
+  final int medalCount;
   const MedalSnapshot({
     required this.path,
+    required this.index,
+    required this.medalCount,
     required this.db,
     Key? key,
   }) : super(key: key);
@@ -116,9 +185,17 @@ class MedalSnapshot extends StatelessWidget {
         }
         final doc = snapshot.data!.data();
         if (doc != null) {
-          return Image(
-            image: AssetImage("assets/" + doc["name"] + ".png"),
-          );
+          return (index > medalCount - 1)
+              ? ColorFiltered(
+                  colorFilter:
+                      ColorFilter.mode(Colors.black38, BlendMode.modulate),
+                  child: Image(
+                    image: AssetImage("assets/medals/" + doc["name"] + ".png"),
+                  ),
+                )
+              : Image(
+                  image: AssetImage("assets/medals/" + doc["name"] + ".png"),
+                );
         } else {
           return const Center(child: Text("doc is null!"));
         }
