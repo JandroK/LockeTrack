@@ -459,4 +459,5 @@ List<List<String>> regionRouteList = [
   teseliaRouteList,
   kalosRouteList,
   alolaRouteList,
+  galarRouteList
 ];
