@@ -334,6 +334,7 @@ class _DropdownButtonContainerState extends State<DropdownButtonContainer> {
   }
 }
 
+// Cambiar por TextButton (cuando esta marcado el color background es de otro color)
 class CheckBoxText extends StatefulWidget {
   final String name;
   final DocumentReference<Map<String, dynamic>> doc;

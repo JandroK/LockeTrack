@@ -132,15 +132,12 @@ class _RegionNameMapState extends State<RegionNameMap> {
                             borderRadius:
                                 const BorderRadius.all(Radius.circular(25)),
                             onTap: () {
-                              // Temporal condition, when all region have routes it will not be necessary
-                              if (i < 5) {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => RouteScreen(
-                                        docID: regions[i], index: i),
-                                  ),
-                                );
-                              }
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      RouteScreen(docID: regions[i], index: i),
+                                ),
+                              );
                             },
                           ),
                         ),
