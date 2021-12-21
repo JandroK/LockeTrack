@@ -1,11 +1,13 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:locketrack/screens/select_region.dart';
+import 'package:locketrack/widgets/auth_gate.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(const MyApp());
+  runApp(const AuthGate(app: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -32,7 +34,14 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Pokémon regions")),
+      appBar: AppBar(title: const Text("Pokémon regions"), actions: [
+        IconButton(
+          icon: const Icon(Icons.logout),
+          onPressed: () {
+            FirebaseAuth.instance.signOut();
+          },
+        )
+      ]),
       body: RegionNameMap(),
     );
   }
