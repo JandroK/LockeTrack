@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 
 class RouteClass {
   String routeName;
-  String pokemonRef;
+  String pokemonObt;
+  String pokemonDel;
   String status;
   bool failed;
   bool dead;
@@ -12,7 +12,8 @@ class RouteClass {
 
   RouteClass.fromFireBase(Map<String, dynamic> doc)
       : routeName = doc['nombre'],
-        pokemonRef = getPokemonName(doc['pokemon']),
+        pokemonObt = getPokemonName(doc['pokeObt']),
+        pokemonDel = getPokemonName(doc['pokeDel']),
         status = doc['status'],
         failed = doc['failed'],
         dead = doc['dead'],

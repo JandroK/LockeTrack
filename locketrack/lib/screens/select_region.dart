@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:locketrack/custom_classes/route.dart';
 import 'package:locketrack/screens/routes_screen.dart';
 
 class RegionNameMap extends StatefulWidget {
@@ -123,7 +122,7 @@ class _RegionNameMapState extends State<RegionNameMap> {
                                 child: const Align(
                                     alignment: Alignment.topRight,
                                     child: Icon(
-                                      Icons.settings_backup_restore_rounded,
+                                      Icons.refresh_rounded,
                                       color: Colors.black,
                                       size: 30,
                                     )),

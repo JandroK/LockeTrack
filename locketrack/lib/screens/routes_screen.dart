@@ -52,7 +52,8 @@ class _RouteScreenState extends State<RouteScreen> {
         routeName.forEach((element) async {
           await collection.add({
             'nombre': element,
-            'pokemon': "zQDOtXNvVNXrRc9iKCNa",
+            'pokeObt': "zQDOtXNvVNXrRc9iKCNa",
+            'pokeDel': "zQDOtXNvVNXrRc9iKCNa",
             'status': "",
             'failed': false,
             'dead': false,
@@ -206,64 +207,14 @@ class RouteInfo extends StatelessWidget {
                 ),
               ),
               GestureDetector(
-                child: const Icon(Icons.settings_backup_restore_rounded),
+                child: const Icon(Icons.refresh_rounded),
                 onTap: () {
                   resetValues(doc);
                 },
               ),
             ],
           ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 10),
-                    InputText(
-                        fieldName: "Pokémon: ", name: routeInfo.pokemonRef),
-                    const SizedBox(height: 10),
-                    DropdownButtonContainer(
-                        fieldName: "status",
-                        name: "Status:      ",
-                        statusList: statusList,
-                        status: routeInfo.status,
-                        doc: doc),
-                  ],
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => Pokedex(),
-                    ),
-                  );
-                },
-                child: Container(
-                  margin: const EdgeInsets.only(left: 10),
-                  padding: const EdgeInsets.all(10),
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.orange,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey,
-                        blurRadius: 4.0,
-                        spreadRadius: 1.0,
-                      )
-                    ],
-                  ),
-                  child: Transform.rotate(
-                    angle: 180 * 3.141516 / 180,
-                    child: const Icon(Icons.catching_pokemon, size: 60),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          PokemonInfo(routeInfo: routeInfo, statusList: statusList, doc: doc),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -279,6 +230,89 @@ class RouteInfo extends StatelessWidget {
   }
 }
 
+class PokemonInfo extends StatelessWidget {
+  const PokemonInfo({
+    Key? key,
+    required this.routeInfo,
+    required this.statusList,
+    required this.doc,
+  }) : super(key: key);
+
+  final RouteClass routeInfo;
+  final List<String> statusList;
+  final doc;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        if (routeInfo.status == "Traded") const PokemonSprite(),
+        Expanded(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 10),
+              InputText(
+                  fieldName: "Pokémon:",
+                  pokeObtained: routeInfo.pokemonObt,
+                  pokeDelivered: routeInfo.pokemonDel,
+                  traded: (routeInfo.status == "Traded") ? true : false),
+              const SizedBox(height: 10),
+              DropdownButtonContainer(
+                  fieldName: "status",
+                  name: "Status:     ",
+                  statusList: statusList,
+                  status: routeInfo.status,
+                  doc: doc,
+                  traded: (routeInfo.status == "Traded") ? true : false),
+            ],
+          ),
+        ),
+        const PokemonSprite(),
+      ],
+    );
+  }
+}
+
+class PokemonSprite extends StatelessWidget {
+  const PokemonSprite({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => Pokedex(),
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.orange,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey,
+              blurRadius: 4.0,
+              spreadRadius: 1.0,
+            )
+          ],
+        ),
+        child: Transform.rotate(
+          angle: 180 * 3.141516 / 180,
+          child: const Icon(Icons.catching_pokemon, size: 60),
+        ),
+      ),
+    );
+  }
+}
+
 class DropdownButtonContainer extends StatefulWidget {
   const DropdownButtonContainer({
     Key? key,
@@ -286,6 +320,7 @@ class DropdownButtonContainer extends StatefulWidget {
     required this.status,
     required this.fieldName,
     required this.name,
+    required this.traded,
     required this.doc,
   }) : super(key: key);
 
@@ -293,6 +328,7 @@ class DropdownButtonContainer extends StatefulWidget {
   final String status;
   final String fieldName;
   final String name;
+  final bool traded;
   final DocumentReference<Map<String, dynamic>> doc;
 
   @override
@@ -304,31 +340,34 @@ class _DropdownButtonContainerState extends State<DropdownButtonContainer> {
   @override
   Widget build(BuildContext context) {
     return Row(children: [
-      Text(widget.name),
+      if (!widget.traded) Text(widget.name),
       Expanded(
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.white, width: 1),
-          ),
-          child: DropdownButton(
-            style: const TextStyle(color: Colors.white, fontSize: 14.0),
-            isDense: true,
-            isExpanded: true,
-            itemHeight: null,
-            items: widget.statusList
-                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                .toList(),
-            hint: Padding(
-              padding: const EdgeInsets.only(left: 4),
-              child: Text(widget.status),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.white, width: 1),
             ),
-            onChanged: (value) => {
-              setState(() {
-                widget.doc.update({
-                  widget.fieldName: value,
-                });
-              })
-            },
+            child: DropdownButton(
+              style: const TextStyle(color: Colors.white, fontSize: 14.0),
+              isDense: true,
+              isExpanded: true,
+              itemHeight: null,
+              items: widget.statusList
+                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  .toList(),
+              hint: Padding(
+                padding: const EdgeInsets.only(left: 4),
+                child: Text(widget.status),
+              ),
+              onChanged: (value) => {
+                setState(() {
+                  widget.doc.update({
+                    widget.fieldName: value,
+                  });
+                })
+              },
+            ),
           ),
         ),
       )
@@ -383,25 +422,38 @@ class _CheckBoxTextState extends State<CheckBoxText> {
 
 class InputText extends StatelessWidget {
   String fieldName = "";
-  String name = "";
+  String pokeObtained = ""; // pokemonObtained
+  String pokeDelivered = ""; // pokemonDelivered
+  bool traded = false;
   InputText({
     this.fieldName = "",
-    this.name = "",
+    this.pokeObtained = "",
+    this.pokeDelivered = "",
+    this.traded = false,
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Row(children: [
-      Text(fieldName),
+      if (!traded) Text(fieldName),
       Expanded(
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.white, width: 1),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(4.0),
-            child: Text(name),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.white, width: 1),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: Row(
+                children: [
+                  if (traded) Text(pokeDelivered),
+                  if (traded) const Icon(Icons.repeat_rounded, size: 20),
+                  Text(pokeObtained)
+                ],
+              ),
+            ),
           ),
         ),
       )
