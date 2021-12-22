@@ -20,6 +20,7 @@ class _CoachTokenState extends State<CoachToken> {
   late DocumentReference<Map<String, dynamic>> db;
   late int lives = 10;
   late int medalCount = 0;
+  late int gen = 0;
   List<String> medals = [];
 
   @override
@@ -58,6 +59,7 @@ class _CoachTokenState extends State<CoachToken> {
         medals.add(result.id);
       });
     });
+    await db.get().then((value) => gen = value.data()?["gen"]);
     setState(() {
       print("Ya he cargado los path");
     });
@@ -66,6 +68,7 @@ class _CoachTokenState extends State<CoachToken> {
   void getCoachInfo(DocumentReference<Map<String, dynamic>> doc) async {
     await doc.get().then((value) => lives = value.data()?["lives"]);
     await doc.get().then((value) => medalCount = value.data()?["medals"]);
+    await doc.get().then((value) => gen = value.data()?["gen"]);
   }
 
   @override
@@ -80,8 +83,11 @@ class _CoachTokenState extends State<CoachToken> {
           const CenteredHeader(
             text: "Medals",
           ),
-          MedalRow(0, medals.length ~/ 2),
-          MedalRow(medals.length ~/ 2, medals.length),
+          if (gen != 7) MedalRow(0, medals.length ~/ 2),
+          if (gen != 7) MedalRow(medals.length ~/ 2, medals.length),
+          if (gen == 7) MedalRow(0, medals.length ~/ 3),
+          if (gen == 7) MedalRow(medals.length ~/ 3, medals.length ~/ 3 * 2),
+          if (gen == 7) MedalRow(medals.length ~/ 3 * 2, medals.length),
           const CenteredHeader(
             text: "Lives",
           ),
@@ -135,6 +141,16 @@ class _CoachTokenState extends State<CoachToken> {
       ],
     );
   }
+}
+
+int calcEnd(int i, int length) {
+  int j = i;
+  if (i + 5 < length) {
+    j += 5;
+  } else {
+    j = length;
+  }
+  return j;
 }
 
 class CenteredHeader extends StatelessWidget {

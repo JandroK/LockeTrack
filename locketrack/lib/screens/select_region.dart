@@ -52,7 +52,8 @@ class _RegionNameMapState extends State<RegionNameMap> {
       if (value.size == 0) {
         int i = 1;
         nameGames.forEach((element) async {
-          await collection.add({'gen': i++, 'name': element});
+          await collection
+              .add({'gen': i++, 'name': element, 'medals': 0, 'lives': 10});
         });
       }
     }).then((value) => loadRegions());
