@@ -33,7 +33,8 @@ String getPokemonName(String ID) {
 
 void resetValues(DocumentReference<Map<String, dynamic>> doc) {
   doc.update({
-    'pokemon': "zQDOtXNvVNXrRc9iKCNa",
+    'pokeObt': "zQDOtXNvVNXrRc9iKCNa",
+    'pokeDel': "zQDOtXNvVNXrRc9iKCNa",
     'status': "",
     'failed': false,
     'dead': false,
