@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class RouteClass {
   String routeName;
-  //String pokemonName;
+  String pokemonRef;
   String status;
   bool failed;
   bool dead;
@@ -11,7 +12,7 @@ class RouteClass {
 
   RouteClass.fromFireBase(Map<String, dynamic> doc)
       : routeName = doc['nombre'],
-        //pokemonName = doc['pokemon'] ?? "",
+        pokemonRef = getPokemonName(doc['pokemon']),
         status = doc['status'],
         failed = doc['failed'],
         dead = doc['dead'],
@@ -19,9 +20,19 @@ class RouteClass {
         team = doc['team'];
 }
 
+String getPokemonName(String ID) {
+  String pokemonName = "";
+  FirebaseFirestore.instance
+      .collection("pokemons")
+      .doc(ID)
+      .get()
+      .then((value) => pokemonName = value.data()?["name"]);
+  return pokemonName;
+}
+
 void resetValues(DocumentReference<Map<String, dynamic>> doc) {
   doc.update({
-    //'pokemon' "pokemons/zQDOtXNvVNXrRc9iKCNa":
+    'pokemon': "zQDOtXNvVNXrRc9iKCNa",
     'status': "",
     'failed': false,
     'dead': false,

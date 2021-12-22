@@ -52,7 +52,7 @@ class _RouteScreenState extends State<RouteScreen> {
         routeName.forEach((element) async {
           await collection.add({
             'nombre': element,
-            //'pokemon': "pokemons/zQDOtXNvVNXrRc9iKCNa",
+            'pokemon': "zQDOtXNvVNXrRc9iKCNa",
             'status': "",
             'failed': false,
             'dead': false,
@@ -222,7 +222,8 @@ class RouteInfo extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 10),
-                    InputText(fieldName: "Pokémon: ", name: ""),
+                    InputText(
+                        fieldName: "Pokémon: ", name: routeInfo.pokemonRef),
                     const SizedBox(height: 10),
                     DropdownButtonContainer(
                         fieldName: "status",
@@ -264,6 +265,7 @@ class RouteInfo extends StatelessWidget {
             ],
           ),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               CheckBoxText(name: "Failed", active: routeInfo.failed, doc: doc),
               CheckBoxText(name: "Dead", active: routeInfo.dead, doc: doc),
@@ -357,18 +359,22 @@ class _CheckBoxTextState extends State<CheckBoxText> {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(widget.name),
-        Checkbox(
-          activeColor: Colors.orange,
-          value: widget.active,
-          onChanged: (bool? value) {
-            setState(() {
-              widget.doc.update({
-                '${widget.name[0].toLowerCase()}${widget.name.substring(1)}':
-                    value!,
-              });
+        OutlinedButton(
+          onPressed: () {
+            widget.doc.update({
+              '${widget.name[0].toLowerCase()}${widget.name.substring(1)}':
+                  !widget.active,
             });
           },
+          child: Text(
+            widget.name,
+            style: const TextStyle(color: Colors.white),
+          ),
+          style: OutlinedButton.styleFrom(
+              minimumSize: const Size(55, 30),
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+              side: const BorderSide(color: Colors.white54),
+              backgroundColor: (widget.active) ? Colors.orange : null),
         ),
       ],
     );
