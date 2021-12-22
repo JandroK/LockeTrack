@@ -38,6 +38,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   firebase_auth: ^3.3.4
   flutterfire_ui: ^0.3.0
+  drop_shadow_image: ^0.9.1
   
 dev_dependencies:
   flutter_test:
@@ -49,7 +50,6 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^1.0.0
-
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
