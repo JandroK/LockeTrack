@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:locketrack/screens/list_pokemon.dart';
 import 'package:drop_shadow_image/drop_shadow_image.dart';
 
 class CoachToken extends StatefulWidget {
@@ -76,8 +77,14 @@ class _CoachTokenState extends State<CoachToken> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          const CenteredHeader(
+            text: "Medals",
+          ),
           MedalRow(0, medals.length ~/ 2),
           MedalRow(medals.length ~/ 2, medals.length),
+          const CenteredHeader(
+            text: "Lives",
+          ),
           LiveRow(0, 5),
           LiveRow(5, 10),
         ],
@@ -126,6 +133,30 @@ class _CoachTokenState extends State<CoachToken> {
             ),
           ),
       ],
+    );
+  }
+}
+
+class CenteredHeader extends StatelessWidget {
+  final String text;
+  const CenteredHeader({
+    required this.text,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+      child: Center(
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -188,6 +219,7 @@ class _MedalSnapshotState extends State<MedalSnapshot> {
                     Image.asset("assets/medals/" + doc["name"] + ".png"),
                   ]),
             onPressed: widget.onMedalsChanged,
+            iconSize: 40,
           );
         } else {
           return const Center(child: Text("doc is null!"));
@@ -227,10 +259,24 @@ class _HeartSnapshotState extends State<HeartSnapshot> {
                 child: Image.asset("assets/heart.png"),
               ),
             )
-          : Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Image.asset("assets/heart.png"),
-            ),
+          : Stack(children: [
+              ColorFiltered(
+                colorFilter:
+                    const ColorFilter.mode(Colors.black, BlendMode.modulate),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: DropShadowImage(
+                    image: Image.asset("assets/heart.png"),
+                    blurRadius: 5.0,
+                    offset: Offset(3.0, 3.0),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Image.asset("assets/heart.png"),
+              ),
+            ]),
       onPressed: widget.onWidgetUpdate,
       iconSize: 50,
     );

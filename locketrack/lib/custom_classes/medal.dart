@@ -1,59 +1,82 @@
-/*class Medal {
-  // ignore: non_constant_identifier_names
-  String image;
-  int index;
-  Medal([this.image = "boulder.png", this.index = 0]);
-}*/
-
 List<String> kantoMedalList = [
-  "boulder",
-  "cascade",
-  "thunder",
-  "rainbow",
-  "soul",
-  "marsh",
-  "volcano",
-  "earth",
+  "Boulder",
+  "Cascade",
+  "Thunder",
+  "Rainbow",
+  "Soul",
+  "Marsh",
+  "Volcano",
+  "Earth",
 ];
 List<String> johtoMedalList = [
-  "zephyr",
-  "hive",
-  "plain",
-  "fog",
-  "storm",
-  "mineral",
-  "glacier",
-  "rising",
+  "Zephyr",
+  "Hive",
+  "Plain",
+  "Fog",
+  "Storm",
+  "Mineral",
+  "Glacier",
+  "Rising",
 ];
 List<String> hoennMedalList = [
-  "stone",
-  "knuckle",
-  "dynamo",
-  "heat",
-  "balance",
-  "feather",
-  "mind",
-  "rain",
+  "Stone",
+  "Knuckle",
+  "Dynamo",
+  "Heat",
+  "Balance",
+  "Feather",
+  "Mind",
+  "Rain",
 ];
 List<String> sinnohMedalList = [
-  "coal",
-  "forest",
-  "cobble",
-  "fen",
-  "relic",
-  "mine",
-  "icicle",
-  "beacon",
+  "Coal",
+  "Forest",
+  "Cobble",
+  "Fen",
+  "Relic",
+  "Mine",
+  "Icicle",
+  "Beacon",
 ];
 List<String> teseliaMedalList = [
-  "trio",
-  "basic",
-  "insect",
-  "bolt",
-  "quake",
-  "jet",
-  "freeze",
-  "legend",
+  "Trio",
+  "Basic",
+  "Insect",
+  "Bolt",
+  "Quake",
+  "Jet",
+  "Freeze",
+  "Legend",
+];
+List<String> kalosMedalList = [
+  "Bug",
+  "Cliff",
+  "Rumble",
+  "Plant",
+  "Voltage",
+  "Fairy",
+  "Psychic",
+  "Iceberg",
+];
+List<String> alolaMedalList = [
+  "Grass",
+  "Water",
+  "Fire",
+  "Fighting",
+  "Fairy1",
+  "Rock",
+  "Dark",
+  "Dragon",
+];
+List<String> galarMedalList = [
+  "Grass",
+  "Water",
+  "Fire",
+  "Fighting",
+  "Fairy1",
+  "Rock",
+  "Dark",
+  "Dragon",
 ];
 
 List<List<String>> regionMedalList = [
@@ -62,4 +85,7 @@ List<List<String>> regionMedalList = [
   hoennMedalList,
   sinnohMedalList,
   teseliaMedalList,
+  kalosMedalList,
+  alolaMedalList,
+  galarMedalList,
 ];
