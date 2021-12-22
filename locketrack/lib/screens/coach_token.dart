@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:locketrack/screens/list_pokemon.dart';
 import 'package:drop_shadow_image/drop_shadow_image.dart';
 
 class CoachToken extends StatefulWidget {
-  final String docID;
+  final DocumentReference<Map<String, dynamic>> docID;
   final List<String> medalsList;
   const CoachToken({
     required this.docID,
@@ -26,8 +25,8 @@ class _CoachTokenState extends State<CoachToken> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    db = FirebaseFirestore.instance.collection("regions").doc(widget.docID);
-    generateMedals(db.collection("medals"), widget.medalsList, widget.docID);
+    db = widget.docID;
+    generateMedals(db.collection("medals"), widget.medalsList);
     getCoachInfo(db);
   }
 
@@ -38,7 +37,7 @@ class _CoachTokenState extends State<CoachToken> {
   }
 
   void generateMedals(CollectionReference<Map<String, dynamic>> collection,
-      List<String> medalName, String path) {
+      List<String> medalName) {
     collection.get().then((value) {
       if (value.size == 0) {
         int i = 1;

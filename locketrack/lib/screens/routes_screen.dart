@@ -7,7 +7,7 @@ import 'package:locketrack/screens/coach_token.dart';
 import 'list_pokemon.dart';
 
 class RouteScreen extends StatefulWidget {
-  final String docID;
+  DocumentReference<Map<String, dynamic>> docID;
   final int index;
   RouteScreen({
     required this.docID,
@@ -28,9 +28,8 @@ class _RouteScreenState extends State<RouteScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    db = FirebaseFirestore.instance.collection("regions").doc(widget.docID);
-    generateRoutes(
-        db.collection("routes"), regionRouteList[widget.index], widget.docID);
+    db = widget.docID;
+    generateRoutes(db.collection("routes"), regionRouteList[widget.index]);
     getGameName(db);
   }
 
@@ -45,7 +44,7 @@ class _RouteScreenState extends State<RouteScreen> {
   }
 
   void generateRoutes(CollectionReference<Map<String, dynamic>> collection,
-      List<String> routeName, String path) {
+      List<String> routeName) {
     collection.get().then((value) {
       if (value.size == 0) {
         int i = 0;

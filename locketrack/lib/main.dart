@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -16,33 +17,15 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    User user = FirebaseAuth.instance.currentUser!;
+    var db = FirebaseFirestore.instance.collection("users");
+    db.doc(user.uid).set({'name': user.email});
     return MaterialApp(
       theme: ThemeData(
         brightness: Brightness.dark,
         primaryColor: Colors.amber,
       ),
-      home: const MainScreen(),
-    );
-  }
-}
-
-class MainScreen extends StatelessWidget {
-  const MainScreen({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Pokémon regions"), actions: [
-        IconButton(
-          icon: const Icon(Icons.logout),
-          onPressed: () {
-            FirebaseAuth.instance.signOut();
-          },
-        )
-      ]),
-      body: RegionNameMap(),
+      home: RegionNameMap(db: db.doc(user.uid)),
     );
   }
 }
