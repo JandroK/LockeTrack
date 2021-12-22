@@ -222,10 +222,6 @@ class RouteInfo extends StatelessWidget {
     Key? key,
   }) : super(key: key);
 
-  bool equalsIgnoreCase(String string1, String string2) {
-    return string1.toLowerCase().contains(string2.toLowerCase());
-  }
-
   @override
   Widget build(BuildContext context) {
     if ((search &&
