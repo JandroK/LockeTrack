@@ -6,6 +6,9 @@ import 'package:locketrack/screens/coach_token.dart';
 
 import 'list_pokemon.dart';
 
+// global variable
+bool search = false;
+
 class RouteScreen extends StatefulWidget {
   DocumentReference<Map<String, dynamic>> docID;
   final int index;
@@ -20,6 +23,7 @@ class RouteScreen extends StatefulWidget {
 }
 
 class _RouteScreenState extends State<RouteScreen> {
+  late TextEditingController controller;
   late DocumentReference<Map<String, dynamic>> db;
   late String gameName = "";
   List<String> routesID = [];
@@ -31,11 +35,13 @@ class _RouteScreenState extends State<RouteScreen> {
     db = widget.docID;
     generateRoutes(db.collection("routes"), regionRouteList[widget.index]);
     getGameName(db);
+    controller = TextEditingController(text: "");
   }
 
   @override
   void dispose() {
     // TODO: implement dispose
+    controller.dispose();
     super.dispose();
   }
 
@@ -80,8 +86,21 @@ class _RouteScreenState extends State<RouteScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: (gameName != "") ? Text("Pokémon $gameName") : Text(""),
-      ),
+          title: (gameName != "")
+              ? Text("Pokémon $gameName", style: const TextStyle(fontSize: 16))
+              : Text(""),
+          actions: [
+            IconButton(
+              icon: Icon((search == false)
+                  ? Icons.search_rounded
+                  : Icons.search_off_rounded),
+              onPressed: () {
+                setState(() {
+                  search = !search;
+                });
+              },
+            )
+          ]),
       floatingActionButton: FloatingActionButton(
         child:
             const Icon(Icons.backpack_outlined, size: 40, color: Colors.white),
@@ -103,11 +122,44 @@ class _RouteScreenState extends State<RouteScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                if (search)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(10, 0, 10, 5),
+                    child: Row(children: [
+                      Expanded(
+                          child: Padding(
+                        padding: const EdgeInsets.only(right: 20),
+                        child: TextField(
+                            controller: controller,
+                            cursorColor: Colors.orange,
+                            decoration: const InputDecoration(
+                              hintText: "Route Name",
+                              focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Colors.orange),
+                              ),
+                            )),
+                      )),
+                      OutlinedButton(
+                          onPressed: () {
+                            setState(() {});
+                          },
+                          child: const Text("Search",
+                              style: TextStyle(color: Colors.white)),
+                          style: OutlinedButton.styleFrom(
+                              minimumSize: const Size(55, 30),
+                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                              side: const BorderSide(color: Colors.white54),
+                              backgroundColor: Colors.orange))
+                    ]),
+                  ),
                 Expanded(
                   child: ListView.builder(
                     itemCount: routesID.length,
                     itemBuilder: (BuildContext context, int index) {
-                      return RouteSnapshot(db: db, path: routesID[index]);
+                      return RouteSnapshot(
+                          db: db,
+                          path: routesID[index],
+                          findRoute: controller.text);
                     },
                   ),
                 ),
@@ -119,8 +171,10 @@ class _RouteScreenState extends State<RouteScreen> {
 
 class RouteSnapshot extends StatelessWidget {
   final String path;
+  final String findRoute;
   const RouteSnapshot({
     required this.path,
+    required this.findRoute,
     required this.db,
     Key? key,
   }) : super(key: key);
@@ -144,8 +198,10 @@ class RouteSnapshot extends StatelessWidget {
         final doc = snapshot.data!.data();
         if (doc != null) {
           return RouteInfo(
-              routeInfo: RouteClass.fromFireBase(doc),
-              doc: db.collection("routes").doc(path));
+            routeInfo: RouteClass.fromFireBase(doc),
+            doc: db.collection("routes").doc(path),
+            findRoute: findRoute,
+          );
         } else {
           return const Center(child: Text("doc is null!"));
         }
@@ -156,76 +212,89 @@ class RouteSnapshot extends StatelessWidget {
 
 class RouteInfo extends StatelessWidget {
   final RouteClass routeInfo;
+  final String findRoute;
   final dynamic doc;
   final List<String> statusList = ["Finded", "Gifted", "Traded", "Egg"];
   RouteInfo({
     required this.routeInfo,
+    required this.findRoute,
     required this.doc,
     Key? key,
   }) : super(key: key);
 
+  bool equalsIgnoreCase(String string1, String string2) {
+    return string1.toLowerCase().contains(string2.toLowerCase());
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(12, 6, 12, 6),
-      padding: const EdgeInsets.fromLTRB(12, 5, 12, 4),
-      decoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(
-          Radius.circular(15),
-        ),
-        border: Border.all(
-          width: 5,
-          color: (routeInfo.status == "")
-              ? Colors.grey
-              : (routeInfo.shiny)
-                  ? Colors.yellow
-                  : (routeInfo.failed || routeInfo.dead)
-                      ? Colors.red
-                      : Colors.green,
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black38,
-            blurRadius: 5.0,
-            spreadRadius: 3.0,
-            offset: Offset(2.0, 2.0), // shadow direction: bottom right
-          )
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Text(
-                  routeInfo.routeName,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 16),
-                ),
-              ),
-              GestureDetector(
-                child: const Icon(Icons.refresh_rounded),
-                onTap: () {
-                  resetValues(doc);
-                },
-              ),
-            ],
+    if ((search &&
+            findRoute != "" &&
+            equalsIgnoreCase(routeInfo.routeName, findRoute)) ||
+        !search) {
+      return Container(
+        margin: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+        padding: const EdgeInsets.fromLTRB(12, 5, 12, 4),
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(
+            Radius.circular(15),
           ),
-          PokemonInfo(routeInfo: routeInfo, statusList: statusList, doc: doc),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              CheckBoxText(name: "Failed", active: routeInfo.failed, doc: doc),
-              CheckBoxText(name: "Dead", active: routeInfo.dead, doc: doc),
-              CheckBoxText(name: "Shiny", active: routeInfo.shiny, doc: doc),
-              CheckBoxText(name: "Team", active: routeInfo.team, doc: doc),
-            ],
-          )
-        ],
-      ),
-    );
+          border: Border.all(
+            width: 5,
+            color: (routeInfo.status == "")
+                ? Colors.grey
+                : (routeInfo.shiny)
+                    ? Colors.yellow
+                    : (routeInfo.failed || routeInfo.dead)
+                        ? Colors.red
+                        : Colors.green,
+          ),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black38,
+              blurRadius: 5.0,
+              spreadRadius: 3.0,
+              offset: Offset(2.0, 2.0), // shadow direction: bottom right
+            )
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Text(
+                    routeInfo.routeName,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ),
+                GestureDetector(
+                  child: const Icon(Icons.refresh_rounded),
+                  onTap: () {
+                    resetValues(doc);
+                  },
+                ),
+              ],
+            ),
+            PokemonInfo(routeInfo: routeInfo, statusList: statusList, doc: doc),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                CheckBoxText(
+                    name: "Failed", active: routeInfo.failed, doc: doc),
+                CheckBoxText(name: "Dead", active: routeInfo.dead, doc: doc),
+                CheckBoxText(name: "Shiny", active: routeInfo.shiny, doc: doc),
+                CheckBoxText(name: "Team", active: routeInfo.team, doc: doc),
+              ],
+            )
+          ],
+        ),
+      );
+    }
+    return const Center();
   }
 }
 
