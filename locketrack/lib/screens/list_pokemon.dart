@@ -14,6 +14,7 @@ class Pokedex extends StatefulWidget {
 class _PokedexState extends State<Pokedex> {
   final db = FirebaseFirestore.instance;
   bool cath = false;
+  bool shiny = false;
   List<String> routes = [];
 
   @override
@@ -74,7 +75,7 @@ class _PokedexState extends State<Pokedex> {
               // Probar a hacer un degradado segun los tipos
               style: ElevatedButton.styleFrom(primary: Colors.black38),
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
+                padding: const EdgeInsets.only(bottom: 8),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -89,25 +90,38 @@ class _PokedexState extends State<Pokedex> {
                               const Text("#001"),
                               const SizedBox(width: 20),
                               const Text("Bulbasaur"),
-                              Expanded(
-                                child: IconButton(
-                                  alignment: Alignment.centerRight,
-                                  padding: const EdgeInsets.all(0),
-                                  constraints:
-                                      const BoxConstraints(maxHeight: 34),
-                                  icon: Icon((cath)
-                                      ? Icons.star_border_rounded
-                                      : Icons.star_rate_rounded),
-                                  onPressed: () {
-                                    setState(() {
-                                      cath = !cath;
-                                    });
-                                  },
-                                ),
-                              )
+                              const Spacer(),
+                              IconButton(
+                                alignment: Alignment.centerRight,
+                                padding: const EdgeInsets.all(0),
+                                constraints:
+                                    const BoxConstraints(maxHeight: 34),
+                                icon: Icon(
+                                    (shiny)
+                                        ? Icons.star_rate_rounded
+                                        : Icons.star_border_rounded,
+                                    color:
+                                        (shiny) ? Colors.orange : Colors.white),
+                                onPressed: () {
+                                  setState(() {
+                                    shiny = !shiny;
+                                  });
+                                },
+                              ),
+                              Checkbox(
+                                activeColor: Colors.orange,
+                                materialTapTargetSize:
+                                    MaterialTapTargetSize.shrinkWrap,
+                                value: cath,
+                                onChanged: (value) {
+                                  setState(() {
+                                    cath = !cath;
+                                  });
+                                },
+                                shape: const CircleBorder(),
+                              ),
                             ],
                           ),
-                          const SizedBox(height: 10),
                           Row(
                             children: [
                               ContainerType("Type"),
@@ -118,7 +132,7 @@ class _PokedexState extends State<Pokedex> {
                       ),
                     ),
                     Container(
-                      margin: const EdgeInsets.only(left: 10),
+                      margin: const EdgeInsets.only(left: 10, top: 8),
                       decoration: const BoxDecoration(
                         shape: BoxShape.circle,
                         color: Colors.orange,
