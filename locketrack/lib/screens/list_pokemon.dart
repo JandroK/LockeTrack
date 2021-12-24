@@ -179,10 +179,10 @@ class PokemonSnapshot extends StatelessWidget {
         final doc = snapshot.data!.data();
         if (doc != null) {
           return PokemonInfo(
-            pokemonInfo: Pokemon.fromFireBase(doc),
-            color: color,
-            findPokemon: findPokemon,
-          );
+              pokemonInfo: Pokemon.fromFireBase(doc),
+              color: color,
+              findPokemon: findPokemon,
+              db: db);
         } else {
           return const Center(child: Text("doc is null!"));
         }
@@ -192,10 +192,12 @@ class PokemonSnapshot extends StatelessWidget {
 }
 
 class PokemonInfo extends StatefulWidget {
+  final DocumentReference<Map<String, dynamic>> db;
   final Pokemon pokemonInfo;
   final Color color;
   final String findPokemon;
   const PokemonInfo({
+    required this.db,
     required this.pokemonInfo,
     required this.color,
     required this.findPokemon,
@@ -235,7 +237,7 @@ class _PokemonInfoState extends State<PokemonInfo> {
         margin: const EdgeInsets.fromLTRB(10, 4, 10, 4),
         child: ElevatedButton(
           onPressed: () {
-            print(widget.pokemonInfo.name);
+            Navigator.of(context).pop(widget.pokemonInfo);
           },
           // Probar a hacer un degradado segun los tipos
           style: ElevatedButton.styleFrom(primary: widget.color),

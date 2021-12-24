@@ -57,8 +57,10 @@ class _RouteScreenState extends State<RouteScreen> {
         routeName.forEach((element) async {
           await collection.add({
             'nombre': element,
-            'pokeObt': "zQDOtXNvVNXrRc9iKCNa",
-            'pokeDel': "zQDOtXNvVNXrRc9iKCNa",
+            'pokeObt': "",
+            'pokeDel': "",
+            'pokeObtNum': "",
+            'pokeDelNum': "",
             'status': "",
             'failed': false,
             'dead': false,
@@ -68,10 +70,10 @@ class _RouteScreenState extends State<RouteScreen> {
           });
         });
       }
-    }).then((value) => drawRoutes());
+    }).then((value) => loadRoutes());
   }
 
-  void drawRoutes() async {
+  void loadRoutes() async {
     await db.collection("routes").orderBy("index").get().then((querySnapshot) {
       querySnapshot.docs.forEach((result) {
         routesID.add(result.id);
@@ -200,7 +202,7 @@ class RouteSnapshot extends StatelessWidget {
         final doc = snapshot.data!.data();
         if (doc != null) {
           return RouteInfo(
-            routeInfo: RouteClass.fromFireBase(doc),
+            routeInfo: RouteClass.fromFireBasse(doc),
             doc: db.collection("routes").doc(path),
             findRoute: findRoute,
           );
@@ -237,7 +239,7 @@ class RouteInfo extends StatelessWidget {
           ),
           border: Border.all(
             width: 5,
-            color: (routeInfo.status == "")
+            color: (routeInfo.pokemonObt == "")
                 ? Colors.grey
                 : (routeInfo.shiny)
                     ? Colors.yellow
@@ -311,7 +313,13 @@ class PokemonInfo extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        if (routeInfo.status == "Traded") const PokemonSprite(),
+        if (routeInfo.status == "Traded")
+          PokemonSprite(
+            doc: doc,
+            traded: true,
+            pokeObtNumDex: routeInfo.pokemonObtNum,
+            pokeDelNumDex: routeInfo.pokemonDelNum,
+          ),
         Expanded(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -334,29 +342,62 @@ class PokemonInfo extends StatelessWidget {
             ],
           ),
         ),
-        const PokemonSprite(),
+        PokemonSprite(
+          doc: doc,
+          traded: false,
+          pokeObtNumDex: routeInfo.pokemonObtNum,
+          pokeDelNumDex: routeInfo.pokemonDelNum,
+        ),
       ],
     );
   }
 }
 
-class PokemonSprite extends StatelessWidget {
+class PokemonSprite extends StatefulWidget {
+  final DocumentReference<Map<String, dynamic>> doc;
+  final bool traded;
+  final String pokeObtNumDex;
+  final String pokeDelNumDex;
   const PokemonSprite({
+    required this.doc,
+    required this.traded,
+    required this.pokeObtNumDex,
+    required this.pokeDelNumDex,
     Key? key,
   }) : super(key: key);
 
   @override
+  State<PokemonSprite> createState() => _PokemonSpriteState();
+}
+
+class _PokemonSpriteState extends State<PokemonSprite> {
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).push(
+        Navigator.of(context)
+            .push(
           MaterialPageRoute(
             builder: (context) => Pokedex(),
           ),
-        );
+        )
+            .then((value) {
+          if (value != null) {
+            setState(() {
+              (!widget.traded)
+                  ? widget.doc.update({
+                      'pokeObt': value.name,
+                      'pokeObtNum': value.numberDex.toString().substring(1),
+                    })
+                  : widget.doc.update({
+                      'pokeDel': value.name,
+                      'pokeDelNum': value.numberDex.toString().substring(1),
+                    });
+            });
+          }
+        });
       },
       child: Container(
-        padding: const EdgeInsets.all(10),
         decoration: const BoxDecoration(
           shape: BoxShape.circle,
           color: Colors.orange,
@@ -368,10 +409,23 @@ class PokemonSprite extends StatelessWidget {
             )
           ],
         ),
-        child: Transform.rotate(
-          angle: 180 * 3.141516 / 180,
-          child: const Icon(Icons.catching_pokemon, size: 60),
-        ),
+        child: (widget.pokeObtNumDex == "")
+            ? Transform.rotate(
+                angle: 180 * 3.141516 / 180,
+                child: const Padding(
+                  padding: EdgeInsets.all(7.5),
+                  child: Icon(Icons.catching_pokemon, size: 60),
+                ),
+              )
+            : (!widget.traded)
+                ? Image.asset(
+                    "assets/sprites/${widget.pokeObtNumDex}.png",
+                    height: 75,
+                  )
+                : Image.asset(
+                    "assets/sprites/${widget.pokeDelNumDex}.png",
+                    height: 75,
+                  ),
       ),
     );
   }
@@ -510,10 +564,15 @@ class InputText extends StatelessWidget {
             ),
             child: Padding(
               padding: const EdgeInsets.all(4.0),
-              child: Row(
+              child: Column(
                 children: [
-                  if (traded) Text(pokeDelivered),
-                  if (traded) const Icon(Icons.repeat_rounded, size: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (traded) Text(pokeDelivered),
+                      if (traded) const Icon(Icons.repeat_rounded, size: 20),
+                    ],
+                  ),
                   Text(pokeObtained)
                 ],
               ),

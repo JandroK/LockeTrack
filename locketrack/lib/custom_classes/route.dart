@@ -4,16 +4,20 @@ class RouteClass {
   String routeName;
   String pokemonObt;
   String pokemonDel;
+  String pokemonObtNum;
+  String pokemonDelNum;
   String status;
   bool failed;
   bool dead;
   bool shiny;
   bool team;
 
-  RouteClass.fromFireBase(Map<String, dynamic> doc)
+  RouteClass.fromFireBasse(Map<String, dynamic> doc)
       : routeName = doc['nombre'],
-        pokemonObt = getPokemonName(doc['pokeObt']),
-        pokemonDel = getPokemonName(doc['pokeDel']),
+        pokemonObt = doc['pokeObt'],
+        pokemonDel = doc['pokeDel'],
+        pokemonObtNum = doc['pokeObtNum'],
+        pokemonDelNum = doc['pokeDelNum'],
         status = doc['status'],
         failed = doc['failed'],
         dead = doc['dead'],
@@ -21,14 +25,8 @@ class RouteClass {
         team = doc['team'];
 }
 
-String getPokemonName(String ID) {
-  String pokemonName = "";
-  FirebaseFirestore.instance
-      .collection("pokemons")
-      .doc(ID)
-      .get()
-      .then((value) => pokemonName = value.data()?["name"]);
-  return pokemonName;
+Future<DocumentSnapshot<Map<String, dynamic>>> getPokemonName(String ID) async {
+  return await FirebaseFirestore.instance.collection("pokemons").doc(ID).get();
 }
 
 bool equalsIgnoreCase(String string1, String string2) {
@@ -37,8 +35,10 @@ bool equalsIgnoreCase(String string1, String string2) {
 
 void resetValues(DocumentReference<Map<String, dynamic>> doc) {
   doc.update({
-    'pokeObt': "zQDOtXNvVNXrRc9iKCNa",
-    'pokeDel': "zQDOtXNvVNXrRc9iKCNa",
+    'pokeObt': "",
+    'pokeDel': "",
+    'pokeObtNum': "",
+    'pokeDelNum': "",
     'status': "",
     'failed': false,
     'dead': false,
