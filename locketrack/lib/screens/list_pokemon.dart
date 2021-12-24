@@ -226,7 +226,7 @@ class _PokemonInfoState extends State<PokemonInfo> {
                   ),
                   child: Image.asset(
                       "assets/sprites/${widget.pokemonInfo.numberDex.substring(1)}.png"),
-                  height: 60)
+                  height: 75)
             ],
           ),
         ),
