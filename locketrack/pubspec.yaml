@@ -39,6 +39,7 @@ dependencies:
   firebase_auth: ^3.3.4
   flutterfire_ui: ^0.3.0
   drop_shadow_image: ^0.9.1
+  palette_generator: ^0.3.2
   
 dev_dependencies:
   flutter_test:
