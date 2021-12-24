@@ -409,7 +409,8 @@ class _PokemonSpriteState extends State<PokemonSprite> {
             )
           ],
         ),
-        child: (widget.pokeObtNumDex == "")
+        child: (widget.pokeObtNumDex == "" ||
+                (widget.pokeDelNumDex == "" && widget.traded))
             ? Transform.rotate(
                 angle: 180 * 3.141516 / 180,
                 child: const Padding(
