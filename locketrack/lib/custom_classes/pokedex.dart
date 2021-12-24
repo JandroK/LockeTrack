@@ -50,6 +50,10 @@ String getNumberDex(int number) {
   return numberDex;
 }
 
+bool equalsIgnoreCase(String string1, String string2) {
+  return string1.toLowerCase().contains(string2.toLowerCase());
+}
+
 Future<String> loadPokedexJSON() async {
   return await rootBundle.loadString('assets/pokedex.json');
 }

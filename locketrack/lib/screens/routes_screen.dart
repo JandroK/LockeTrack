@@ -127,9 +127,9 @@ class _RouteScreenState extends State<RouteScreen> {
                     padding: const EdgeInsets.fromLTRB(10, 0, 10, 5),
                     child: Row(children: [
                       Expanded(
-                          child: Padding(
-                        padding: const EdgeInsets.only(right: 20),
-                        child: TextField(
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 20),
+                          child: TextField(
                             controller: controller,
                             cursorColor: Colors.orange,
                             decoration: const InputDecoration(
@@ -137,8 +137,10 @@ class _RouteScreenState extends State<RouteScreen> {
                               focusedBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(color: Colors.orange),
                               ),
-                            )),
-                      )),
+                            ),
+                          ),
+                        ),
+                      ),
                       OutlinedButton(
                           onPressed: () {
                             setState(() {});
@@ -224,9 +226,7 @@ class RouteInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if ((search &&
-            findRoute != "" &&
-            equalsIgnoreCase(routeInfo.routeName, findRoute)) ||
+    if ((search && equalsIgnoreCase(routeInfo.routeName, findRoute)) ||
         !search) {
       return Container(
         margin: const EdgeInsets.fromLTRB(12, 6, 12, 6),
