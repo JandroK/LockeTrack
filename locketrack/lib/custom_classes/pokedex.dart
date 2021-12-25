@@ -1,6 +1,9 @@
 import 'dart:async' show Future;
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:convert';
+
+import 'package:palette_generator/palette_generator.dart';
 
 class Pokedex {
   final List<Pokemon> pokemons;
@@ -63,4 +66,11 @@ Future<List<Pokemon>> loadPokedex() async {
   final jsonResponse = json.decode(jsonString);
   Pokedex pokedex = Pokedex.fromJson(jsonResponse);
   return pokedex.pokemons;
+}
+
+Future<PaletteGenerator> paletteGenerator(String path) async {
+  return await PaletteGenerator.fromImageProvider(
+    AssetImage("assets/sprites/$path.png"),
+    maximumColorCount: 25,
+  );
 }

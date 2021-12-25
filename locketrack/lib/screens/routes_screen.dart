@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:locketrack/custom_classes/medal.dart';
 import 'package:locketrack/custom_classes/route.dart';
 import 'package:locketrack/screens/coach_token.dart';
+import 'package:palette_generator/palette_generator.dart';
 
 import 'list_pokemon.dart';
 
@@ -230,69 +231,110 @@ class RouteInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     if ((search && equalsIgnoreCase(routeInfo.routeName, findRoute)) ||
         !search) {
-      return Container(
-        margin: const EdgeInsets.fromLTRB(12, 6, 12, 6),
-        padding: const EdgeInsets.fromLTRB(12, 5, 12, 4),
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(
-            Radius.circular(15),
-          ),
-          border: Border.all(
-            width: 5,
-            color: (routeInfo.pokemonObt == "")
-                ? Colors.grey
-                : (routeInfo.shiny)
-                    ? Colors.yellow
-                    : (routeInfo.failed || routeInfo.dead)
-                        ? Colors.red
-                        : Colors.green,
-          ),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black38,
-              blurRadius: 5.0,
-              spreadRadius: 3.0,
-              offset: Offset(2.0, 2.0), // shadow direction: bottom right
-            )
-          ],
-        ),
-        child: Column(
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Text(
-                    routeInfo.routeName,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                ),
-                GestureDetector(
-                  child: const Icon(Icons.refresh_rounded),
-                  onTap: () {
-                    resetValues(doc);
-                  },
-                ),
-              ],
-            ),
-            PokemonInfo(routeInfo: routeInfo, statusList: statusList, doc: doc),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                CheckBoxText(
-                    name: "Failed", active: routeInfo.failed, doc: doc),
-                CheckBoxText(name: "Dead", active: routeInfo.dead, doc: doc),
-                CheckBoxText(name: "Shiny", active: routeInfo.shiny, doc: doc),
-                CheckBoxText(name: "Team", active: routeInfo.team, doc: doc),
-              ],
-            )
-          ],
-        ),
-      );
+      if (routeInfo.pokemonObtNum != "") {
+        return FutureBuilder(
+          future: paletteGenerator(routeInfo.pokemonObtNum),
+          builder: (BuildContext context,
+              AsyncSnapshot<PaletteGenerator> snapshotObt) {
+            if (!snapshotObt.hasData) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            if (routeInfo.pokemonDelNum != "") {
+              return FutureBuilder(
+                future: paletteGenerator(routeInfo.pokemonDelNum),
+                builder: (BuildContext context,
+                    AsyncSnapshot<PaletteGenerator> snapshotDel) {
+                  if (!snapshotDel.hasData) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                  return ContainerRoute(
+                      true,
+                      snapshotDel.data!.dominantColor!.color,
+                      snapshotObt.data!.dominantColor!.color);
+                },
+              );
+            }
+            return ContainerRoute(true, snapshotObt.data!.dominantColor!.color,
+                snapshotObt.data!.dominantColor!.color);
+          },
+        );
+      }
+      return ContainerRoute(false, Colors.black38, Colors.black38);
     }
     return const Center();
+  }
+
+  Container ContainerRoute(bool future, Color colorObt, Color colorDel) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+      padding: const EdgeInsets.fromLTRB(12, 5, 12, 4),
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(
+          Radius.circular(15),
+        ),
+        border: Border.all(
+          width: 5,
+          color: (routeInfo.pokemonObt == "")
+              ? Colors.grey
+              : (routeInfo.shiny)
+                  ? Colors.yellow
+                  : (routeInfo.failed || routeInfo.dead)
+                      ? Colors.red
+                      : Colors.green,
+        ),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [colorObt.withAlpha(220), colorDel.withAlpha(220)],
+          stops: const [0.4, 0.6],
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 5.0,
+            spreadRadius: 3.0,
+            offset: Offset(2.0, 2.0), // shadow direction: bottom right
+          )
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Text(
+                  routeInfo.routeName,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+              GestureDetector(
+                child: const Icon(Icons.refresh_rounded),
+                onTap: () {
+                  resetValues(doc);
+                },
+              ),
+            ],
+          ),
+          PokemonInfo(routeInfo: routeInfo, statusList: statusList, doc: doc),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              CheckBoxText(name: "Failed", active: routeInfo.failed, doc: doc),
+              CheckBoxText(name: "Dead", active: routeInfo.dead, doc: doc),
+              CheckBoxText(name: "Shiny", active: routeInfo.shiny, doc: doc),
+              CheckBoxText(name: "Team", active: routeInfo.team, doc: doc),
+            ],
+          )
+        ],
+      ),
+    );
   }
 }
 
@@ -398,15 +440,17 @@ class _PokemonSpriteState extends State<PokemonSprite> {
         });
       },
       child: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.orange,
+          color: (widget.pokeObtNumDex == "") ? Colors.orange : Colors.white38,
           boxShadow: [
-            BoxShadow(
-              color: Colors.grey,
-              blurRadius: 4.0,
-              spreadRadius: 1.0,
-            )
+            (widget.pokeObtNumDex == "")
+                ? const BoxShadow(
+                    color: Colors.grey,
+                    blurRadius: 4.0,
+                    spreadRadius: 1.0,
+                  )
+                : const BoxShadow(color: Colors.white10)
           ],
         ),
         child: (widget.pokeObtNumDex == "" ||

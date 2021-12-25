@@ -18,7 +18,6 @@ class Pokedex extends StatefulWidget {
 class _PokedexState extends State<Pokedex> {
   final db = FirebaseFirestore.instance.collection("pokemons");
   List<String> pokemonsID = [];
-  List<Color> paletteColors = [];
   late TextEditingController controller;
 
   @override
@@ -34,18 +33,6 @@ class _PokedexState extends State<Pokedex> {
     // TODO: implement dispose
     controller.dispose();
     super.dispose();
-  }
-
-  void paletteGenerator(String path) async {
-    if (path != "000") {
-      await PaletteGenerator.fromImageProvider(
-        AssetImage("assets/sprites/$path.png"),
-        maximumColorCount: 25,
-      ).then((value) {
-        paletteColors.add(value.dominantColor!.color);
-      });
-    }
-    setState(() {});
   }
 
   void generatePokemons(CollectionReference<Map<String, dynamic>> collection) {
@@ -69,7 +56,6 @@ class _PokedexState extends State<Pokedex> {
     await db.orderBy("number_dex").get().then((querySnapshot) {
       querySnapshot.docs.forEach((result) {
         pokemonsID.add(result.id);
-        paletteGenerator(result.data()["number_dex"].toString().substring(1));
       });
     }).then((value) => pokemonsID.remove(pokemonsID[0]));
     setState(() {
@@ -95,7 +81,7 @@ class _PokedexState extends State<Pokedex> {
           )
         ],
       ),
-      body: (pokemonsID.isEmpty || paletteColors.isEmpty)
+      body: (pokemonsID.isEmpty)
           ? const Center(child: CircularProgressIndicator())
           : Column(
               mainAxisSize: MainAxisSize.min,
@@ -139,7 +125,6 @@ class _PokedexState extends State<Pokedex> {
                     itemBuilder: (BuildContext context, int index) {
                       return PokemonSnapshot(
                           db: db.doc(pokemonsID[index]),
-                          color: paletteColors[index],
                           findPokemon: controller.text);
                     },
                   ),
@@ -152,10 +137,8 @@ class _PokedexState extends State<Pokedex> {
 
 class PokemonSnapshot extends StatelessWidget {
   final String findPokemon;
-  final Color color;
   const PokemonSnapshot({
     required this.findPokemon,
-    required this.color,
     required this.db,
     Key? key,
   }) : super(key: key);
@@ -180,7 +163,6 @@ class PokemonSnapshot extends StatelessWidget {
         if (doc != null) {
           return PokemonInfo(
               pokemonInfo: Pokemon.fromFireBase(doc),
-              color: color,
               findPokemon: findPokemon,
               db: db);
         } else {
@@ -194,12 +176,10 @@ class PokemonSnapshot extends StatelessWidget {
 class PokemonInfo extends StatefulWidget {
   final DocumentReference<Map<String, dynamic>> db;
   final Pokemon pokemonInfo;
-  final Color color;
   final String findPokemon;
   const PokemonInfo({
     required this.db,
     required this.pokemonInfo,
-    required this.color,
     required this.findPokemon,
     Key? key,
   }) : super(key: key);
@@ -233,93 +213,107 @@ class _PokemonInfoState extends State<PokemonInfo> {
     if ((search &&
             equalsIgnoreCase(widget.pokemonInfo.name, widget.findPokemon)) ||
         !search) {
-      return Card(
-        margin: const EdgeInsets.fromLTRB(10, 4, 10, 4),
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).pop(widget.pokemonInfo);
-          },
-          // Probar a hacer un degradado segun los tipos
-          style: ElevatedButton.styleFrom(primary: widget.color),
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Text(
-                            widget.pokemonInfo.numberDex,
-                            style:
-                                TextStyle(color: Colors.black.withAlpha(150)),
-                          ),
-                          const SizedBox(width: 20),
-                          Text(widget.pokemonInfo.name,
-                              style: TextStyle(
-                                  color: Colors.black.withAlpha(150))),
-                          const Spacer(),
-                          IconButton(
-                            alignment: Alignment.centerRight,
-                            padding: const EdgeInsets.all(0),
-                            constraints: const BoxConstraints(maxHeight: 34),
-                            icon: Icon(
-                                (shiny)
-                                    ? Icons.star_rate_rounded
-                                    : Icons.star_border_rounded,
-                                color: Colors.black.withAlpha(150)),
-                            onPressed: () {
-                              setState(() {
-                                shiny = !shiny;
-                              });
-                            },
-                          ),
-                          Checkbox(
-                            activeColor: Colors.black.withAlpha(150),
-                            side: BorderSide(
-                                color: Colors.black.withAlpha(150), width: 2),
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                            value: cath,
-                            onChanged: (value) {
-                              setState(() {
-                                cath = !cath;
-                              });
-                            },
-                            shape: const CircleBorder(),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          containerType(widget.pokemonInfo.types[0]),
-                          if (widget.pokemonInfo.types[1] != "")
-                            containerType(widget.pokemonInfo.types[1]),
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-                Container(
-                    margin: const EdgeInsets.only(left: 10, top: 8),
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white38,
-                    ),
-                    child: Image.asset(
-                        "assets/sprites/${widget.pokemonInfo.numberDex.substring(1)}.png"),
-                    height: 75)
-              ],
-            ),
-          ),
-        ),
+      return FutureBuilder(
+        future: paletteGenerator(widget.pokemonInfo.numberDex.substring(1)),
+        builder:
+            (BuildContext context, AsyncSnapshot<PaletteGenerator> snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          return PokemonCard(context, snapshot.data!.dominantColor!.color);
+        },
       );
     }
     return const Center();
+  }
+
+  Card PokemonCard(BuildContext context, Color color) {
+    return Card(
+      margin: const EdgeInsets.fromLTRB(10, 4, 10, 4),
+      child: ElevatedButton(
+        onPressed: () {
+          Navigator.of(context).pop(widget.pokemonInfo);
+        },
+        // Probar a hacer un degradado segun los tipos
+        style: ElevatedButton.styleFrom(primary: color),
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Text(
+                          widget.pokemonInfo.numberDex,
+                          style: TextStyle(color: Colors.black.withAlpha(150)),
+                        ),
+                        const SizedBox(width: 20),
+                        Text(widget.pokemonInfo.name,
+                            style:
+                                TextStyle(color: Colors.black.withAlpha(150))),
+                        const Spacer(),
+                        IconButton(
+                          alignment: Alignment.centerRight,
+                          padding: const EdgeInsets.all(0),
+                          constraints: const BoxConstraints(maxHeight: 34),
+                          icon: Icon(
+                              (shiny)
+                                  ? Icons.star_rate_rounded
+                                  : Icons.star_border_rounded,
+                              color: Colors.black.withAlpha(150)),
+                          onPressed: () {
+                            setState(() {
+                              shiny = !shiny;
+                            });
+                          },
+                        ),
+                        Checkbox(
+                          activeColor: Colors.black.withAlpha(150),
+                          side: BorderSide(
+                              color: Colors.black.withAlpha(150), width: 2),
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                          value: cath,
+                          onChanged: (value) {
+                            setState(() {
+                              cath = !cath;
+                            });
+                          },
+                          shape: const CircleBorder(),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        containerType(widget.pokemonInfo.types[0]),
+                        if (widget.pokemonInfo.types[1] != "")
+                          containerType(widget.pokemonInfo.types[1]),
+                      ],
+                    )
+                  ],
+                ),
+              ),
+              Container(
+                  margin: const EdgeInsets.only(left: 10, top: 8),
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white38,
+                  ),
+                  child: Image.asset(
+                      "assets/sprites/${widget.pokemonInfo.numberDex.substring(1)}.png"),
+                  height: 75)
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

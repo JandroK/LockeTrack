@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:palette_generator/palette_generator.dart';
 
 class RouteClass {
   String routeName;
@@ -31,6 +33,13 @@ Future<DocumentSnapshot<Map<String, dynamic>>> getPokemonName(String ID) async {
 
 bool equalsIgnoreCase(String string1, String string2) {
   return string1.toLowerCase().contains(string2.toLowerCase());
+}
+
+Future<PaletteGenerator> paletteGenerator(String path) async {
+  return await PaletteGenerator.fromImageProvider(
+    AssetImage("assets/sprites/$path.png"),
+    maximumColorCount: 25,
+  );
 }
 
 void resetValues(DocumentReference<Map<String, dynamic>> doc) {
