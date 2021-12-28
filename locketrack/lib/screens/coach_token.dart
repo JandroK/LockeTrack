@@ -1,14 +1,19 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:locketrack/screens/list_pokemon.dart';
 import 'package:drop_shadow_image/drop_shadow_image.dart';
+import 'package:confetti/confetti.dart';
 
 class CoachToken extends StatefulWidget {
   final DocumentReference<Map<String, dynamic>> docID;
   final List<String> medalsList;
+  final String gameName;
   const CoachToken({
     required this.docID,
     required this.medalsList,
+    required this.gameName,
     Key? key,
   }) : super(key: key);
 
@@ -21,6 +26,7 @@ class _CoachTokenState extends State<CoachToken> {
   late int lives = 10;
   late int medalCount = 0;
   late int gen = 0;
+  bool confetti = false;
   List<String> medals = [];
 
   @override
@@ -88,6 +94,7 @@ class _CoachTokenState extends State<CoachToken> {
           if (gen == 7) MedalRow(0, medals.length ~/ 3),
           if (gen == 7) MedalRow(medals.length ~/ 3, medals.length ~/ 3 * 2),
           if (gen == 7) MedalRow(medals.length ~/ 3 * 2, medals.length),
+          //if (confetti) Confetti(),
           const CenteredHeader(
             text: "Lives",
           ),
@@ -127,8 +134,10 @@ class _CoachTokenState extends State<CoachToken> {
           Expanded(
             child: MedalSnapshot(
               db: db,
+              gameName: widget.gameName,
               path: medals[i],
               index: i,
+              maxMedals: medals.length,
               medalCount: medalCount,
               onMedalsChanged: () {
                 setState(() {
@@ -136,9 +145,59 @@ class _CoachTokenState extends State<CoachToken> {
                   medalCount = i + 1;
                 });
               },
+              onConfettiBlast: () {
+                setState(() {
+                  confetti = !confetti;
+                });
+              },
             ),
           ),
       ],
+    );
+  }
+}
+
+class Confetti extends StatefulWidget {
+  const Confetti({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  State<Confetti> createState() => _ConfettiState();
+}
+
+class _ConfettiState extends State<Confetti> {
+  late ConfettiController controller;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    controller = ConfettiController(duration: Duration(seconds: 2));
+    controller.play();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ConfettiWidget(
+        confettiController: controller,
+        // ignore: prefer_const_literals_to_create_immutables
+        colors: [
+          Colors.red,
+          Colors.blue,
+          Colors.green,
+          Colors.yellow,
+          Colors.orange,
+          Colors.purple,
+        ],
+        shouldLoop: true,
+        emissionFrequency: 0.05,
+        numberOfParticles: 5,
+        blastDirectionality: BlastDirectionality.explosive,
+        gravity: 0.3,
+        maxBlastForce: 30,
+      ),
     );
   }
 }
@@ -179,15 +238,21 @@ class CenteredHeader extends StatelessWidget {
 
 class MedalSnapshot extends StatefulWidget {
   final VoidCallback onMedalsChanged;
+  final VoidCallback onConfettiBlast;
+  final String gameName;
   final String path;
   final int index;
+  final int maxMedals;
   late int medalCount;
   MedalSnapshot({
+    required this.gameName,
     required this.path,
     required this.index,
     required this.medalCount,
+    required this.maxMedals,
     required this.db,
     required this.onMedalsChanged,
+    required this.onConfettiBlast,
     Key? key,
   }) : super(key: key);
 
@@ -198,6 +263,62 @@ class MedalSnapshot extends StatefulWidget {
 }
 
 class _MedalSnapshotState extends State<MedalSnapshot> {
+  void congratulationsDialogue() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text(
+            "CONGRATULATIONS!",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          elevation: 24.0,
+          backgroundColor: Color.fromRGBO(46, 46, 46, 1),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(30),
+            ),
+            side: BorderSide(
+              width: 3,
+              color: Colors.black,
+            ),
+          ),
+          content: SizedBox(
+            width: 50,
+            height: 50,
+            child: Stack(
+              children: [
+                Text(
+                  "You completed your ${widget.gameName} nuzlocke run!",
+                  textAlign: TextAlign.center,
+                ),
+                const Confetti()
+              ],
+            ),
+          ),
+          actions: [
+            Center(
+              child: TextButton(
+                child: const Text(
+                  "OK",
+                  style: TextStyle(fontSize: 20),
+                ),
+                //onPressed: () => Navigator.of(context).pop(),
+                onPressed: () {
+                  widget.onConfettiBlast();
+                  Navigator.of(context).pop();
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -234,7 +355,13 @@ class _MedalSnapshotState extends State<MedalSnapshot> {
                     ),
                     Image.asset("assets/medals/" + doc["name"] + ".png"),
                   ]),
-            onPressed: widget.onMedalsChanged,
+            onPressed: () {
+              widget.onMedalsChanged();
+              if (widget.index == widget.maxMedals - 1) {
+                congratulationsDialogue();
+              }
+              widget.onConfettiBlast();
+            },
             iconSize: 40,
           );
         } else {

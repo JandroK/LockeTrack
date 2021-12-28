@@ -114,6 +114,7 @@ class _RouteScreenState extends State<RouteScreen> {
               builder: (context) => CoachToken(
                 docID: widget.docID,
                 medalsList: regionMedalList[widget.index],
+                gameName: gameName,
               ),
             ),
           );
