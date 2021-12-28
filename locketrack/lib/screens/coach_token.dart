@@ -1,5 +1,5 @@
+// ignore_for_file: must_be_immutable
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:locketrack/screens/list_pokemon.dart';
@@ -31,6 +31,7 @@ class _CoachTokenState extends State<CoachToken> {
 
   @override
   void initState() {
+    // ignore: todo
     // TODO: implement initState
     super.initState();
     db = widget.docID;
@@ -40,6 +41,7 @@ class _CoachTokenState extends State<CoachToken> {
 
   @override
   void dispose() {
+    // ignore: todo
     // TODO: implement dispose
     super.dispose();
   }
@@ -49,6 +51,7 @@ class _CoachTokenState extends State<CoachToken> {
     collection.get().then((value) {
       if (value.size == 0) {
         int i = 1;
+        // ignore: avoid_function_literals_in_foreach_calls
         medalName.forEach((element) async {
           await collection.add({
             'name': element,
@@ -61,14 +64,11 @@ class _CoachTokenState extends State<CoachToken> {
 
   void loadMedals() async {
     await db.collection("medals").orderBy("index").get().then((querySnapshot) {
-      querySnapshot.docs.forEach((result) {
+      for (var result in querySnapshot.docs) {
         medals.add(result.id);
-      });
+      }
     });
     await db.get().then((value) => gen = value.data()?["gen"]);
-    setState(() {
-      print("Ya he cargado los path");
-    });
   }
 
   void getCoachInfo(DocumentReference<Map<String, dynamic>> doc) async {
@@ -83,24 +83,87 @@ class _CoachTokenState extends State<CoachToken> {
       appBar: AppBar(
         title: const Text("Locke Progression"),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const CenteredHeader(
-            text: "Medals",
-          ),
-          if (gen != 7) MedalRow(0, medals.length ~/ 2),
-          if (gen != 7) MedalRow(medals.length ~/ 2, medals.length),
-          if (gen == 7) MedalRow(0, medals.length ~/ 3),
-          if (gen == 7) MedalRow(medals.length ~/ 3, medals.length ~/ 3 * 2),
-          if (gen == 7) MedalRow(medals.length ~/ 3 * 2, medals.length),
-          //if (confetti) Confetti(),
-          const CenteredHeader(
-            text: "Lives",
-          ),
-          LiveRow(0, 5),
-          LiveRow(5, 10),
-        ],
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 0),
+              child: Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      width: 3,
+                      color: Color.fromRGBO(64, 70, 156, 1),
+                    ),
+                    color: Color.fromRGBO(54, 59, 129, 1),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const CenteredHeader(
+                        text: "Medals",
+                      ),
+                      if (gen != 7) MedalRow(0, medals.length ~/ 2),
+                      if (gen != 7) MedalRow(medals.length ~/ 2, medals.length),
+                      if (gen == 7) MedalRow(0, medals.length ~/ 3),
+                      if (gen == 7)
+                        MedalRow(medals.length ~/ 3, medals.length ~/ 3 * 2),
+                      if (gen == 7)
+                        MedalRow(medals.length ~/ 3 * 2, medals.length),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 0),
+              child: Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      width: 3,
+                      color: Color.fromRGBO(207, 37, 37, 1),
+                    ),
+                    color: Colors.red[900],
+                  ),
+                  child: Column(
+                    children: [
+                      const CenteredHeader(
+                        text: "Lives",
+                      ),
+                      LiveRow(0, 5),
+                      LiveRow(5, 10),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 0),
+              child: Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      width: 3,
+                      color: Color.fromRGBO(20, 110, 34, 1),
+                    ),
+                    color: Colors.green[900],
+                  ),
+                  child: Column(
+                    children: [
+                      const CenteredHeader(
+                        text: "Team",
+                      ),
+                      LiveRow(0, 5),
+                      LiveRow(5, 10),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -170,9 +233,10 @@ class _ConfettiState extends State<Confetti> {
   late ConfettiController controller;
   @override
   void initState() {
+    // ignore: todo
     // TODO: implement initState
     super.initState();
-    controller = ConfettiController(duration: Duration(seconds: 2));
+    controller = ConfettiController(duration: const Duration(seconds: 2));
     controller.play();
   }
 
@@ -276,8 +340,8 @@ class _MedalSnapshotState extends State<MedalSnapshot> {
             ),
           ),
           elevation: 24.0,
-          backgroundColor: Color.fromRGBO(46, 46, 46, 1),
-          shape: RoundedRectangleBorder(
+          backgroundColor: const Color.fromRGBO(46, 46, 46, 1),
+          shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(
               Radius.circular(30),
             ),
@@ -339,18 +403,18 @@ class _MedalSnapshotState extends State<MedalSnapshot> {
             icon: (widget.index > widget.medalCount - 1)
                 ? ColorFiltered(
                     colorFilter: const ColorFilter.mode(
-                        Colors.black38, BlendMode.modulate),
+                        Color.fromRGBO(11, 16, 64, 1), BlendMode.modulate),
                     child: Image.asset("assets/medals/" + doc["name"] + ".png"),
                   )
                 : Stack(children: [
                     ColorFiltered(
                       colorFilter: const ColorFilter.mode(
-                          Colors.black, BlendMode.modulate),
+                          Color.fromRGBO(7, 10, 41, 1), BlendMode.modulate),
                       child: DropShadowImage(
                         image: Image.asset(
                             "assets/medals/" + doc["name"] + ".png"),
                         blurRadius: 5.0,
-                        offset: Offset(3.0, 3.0),
+                        offset: const Offset(3.0, 3.0),
                       ),
                     ),
                     Image.asset("assets/medals/" + doc["name"] + ".png"),
@@ -396,22 +460,23 @@ class _HeartSnapshotState extends State<HeartSnapshot> {
     return IconButton(
       icon: (widget.index > widget.lives - 1)
           ? ColorFiltered(
-              colorFilter: ColorFilter.mode(Colors.black38, BlendMode.modulate),
+              colorFilter: const ColorFilter.mode(
+                  Color.fromRGBO(38, 8, 8, 1), BlendMode.modulate),
               child: Padding(
-                padding: EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8.0),
                 child: Image.asset("assets/heart.png"),
               ),
             )
           : Stack(children: [
               ColorFiltered(
-                colorFilter:
-                    const ColorFilter.mode(Colors.black, BlendMode.modulate),
+                colorFilter: const ColorFilter.mode(
+                    Color.fromRGBO(18, 4, 4, 1), BlendMode.modulate),
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: DropShadowImage(
                     image: Image.asset("assets/heart.png"),
                     blurRadius: 5.0,
-                    offset: Offset(3.0, 3.0),
+                    offset: const Offset(3.0, 3.0),
                   ),
                 ),
               ),
