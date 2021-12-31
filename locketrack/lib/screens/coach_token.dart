@@ -1,14 +1,14 @@
 // ignore_for_file: must_be_immutable
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:locketrack/custom_classes/medal.dart';
 import 'package:locketrack/screens/list_pokemon.dart';
 import 'package:drop_shadow_image/drop_shadow_image.dart';
 import 'package:confetti/confetti.dart';
 
 class CoachToken extends StatefulWidget {
   final DocumentReference<Map<String, dynamic>> docID;
-  final List<String> medalsList;
+  final List<Medal> medalsList;
   final String gameName;
   const CoachToken({
     required this.docID,
@@ -47,14 +47,15 @@ class _CoachTokenState extends State<CoachToken> {
   }
 
   void generateMedals(CollectionReference<Map<String, dynamic>> collection,
-      List<String> medalName) {
+      List<Medal> medals) {
     collection.get().then((value) {
       if (value.size == 0) {
         int i = 1;
         // ignore: avoid_function_literals_in_foreach_calls
-        medalName.forEach((element) async {
+        medals.forEach((element) async {
           await collection.add({
-            'name': element,
+            'name': element.name,
+            'lvl': element.lvl,
             'index': i++,
           });
         });
@@ -69,6 +70,9 @@ class _CoachTokenState extends State<CoachToken> {
       }
     });
     await db.get().then((value) => gen = value.data()?["gen"]);
+    setState(() {
+      print("Medals loaded");
+    });
   }
 
   void getCoachInfo(DocumentReference<Map<String, dynamic>> doc) async {
@@ -83,88 +87,92 @@ class _CoachTokenState extends State<CoachToken> {
       appBar: AppBar(
         title: const Text("Locke Progression"),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 0),
-              child: Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      width: 3,
-                      color: Color.fromRGBO(64, 70, 156, 1),
-                    ),
-                    color: Color.fromRGBO(54, 59, 129, 1),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const CenteredHeader(
-                        text: "Medals",
+      body: (medals.isEmpty)
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 0),
+                    child: Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            width: 3,
+                            color: const Color.fromRGBO(64, 70, 156, 1),
+                          ),
+                          color: const Color.fromRGBO(54, 59, 129, 1),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const CenteredHeader(
+                              text: "Medals",
+                            ),
+                            if (gen != 7) MedalRow(0, medals.length ~/ 2),
+                            if (gen != 7)
+                              MedalRow(medals.length ~/ 2, medals.length),
+                            if (gen == 7) MedalRow(0, medals.length ~/ 3),
+                            if (gen == 7)
+                              MedalRow(
+                                  medals.length ~/ 3, medals.length ~/ 3 * 2),
+                            if (gen == 7)
+                              MedalRow(medals.length ~/ 3 * 2, medals.length),
+                          ],
+                        ),
                       ),
-                      if (gen != 7) MedalRow(0, medals.length ~/ 2),
-                      if (gen != 7) MedalRow(medals.length ~/ 2, medals.length),
-                      if (gen == 7) MedalRow(0, medals.length ~/ 3),
-                      if (gen == 7)
-                        MedalRow(medals.length ~/ 3, medals.length ~/ 3 * 2),
-                      if (gen == 7)
-                        MedalRow(medals.length ~/ 3 * 2, medals.length),
-                    ],
+                    ),
                   ),
-                ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 0),
+                    child: Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            width: 3,
+                            color: const Color.fromRGBO(207, 37, 37, 1),
+                          ),
+                          color: Colors.red[900],
+                        ),
+                        child: Column(
+                          children: [
+                            const CenteredHeader(
+                              text: "Lives",
+                            ),
+                            LiveRow(0, 5),
+                            LiveRow(5, 10),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 0),
+                    child: Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            width: 3,
+                            color: const Color.fromRGBO(20, 110, 34, 1),
+                          ),
+                          color: Colors.green[900],
+                        ),
+                        child: Column(
+                          children: [
+                            const CenteredHeader(
+                              text: "Team",
+                            ),
+                            LiveRow(0, 5),
+                            LiveRow(5, 10),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 0),
-              child: Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      width: 3,
-                      color: Color.fromRGBO(207, 37, 37, 1),
-                    ),
-                    color: Colors.red[900],
-                  ),
-                  child: Column(
-                    children: [
-                      const CenteredHeader(
-                        text: "Lives",
-                      ),
-                      LiveRow(0, 5),
-                      LiveRow(5, 10),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 0),
-              child: Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      width: 3,
-                      color: Color.fromRGBO(20, 110, 34, 1),
-                    ),
-                    color: Colors.green[900],
-                  ),
-                  child: Column(
-                    children: [
-                      const CenteredHeader(
-                        text: "Team",
-                      ),
-                      LiveRow(0, 5),
-                      LiveRow(5, 10),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -259,7 +267,7 @@ class _ConfettiState extends State<Confetti> {
         emissionFrequency: 0.05,
         numberOfParticles: 5,
         blastDirectionality: BlastDirectionality.explosive,
-        gravity: 0.3,
+        gravity: 0.5,
         maxBlastForce: 30,
       ),
     );
@@ -399,34 +407,43 @@ class _MedalSnapshotState extends State<MedalSnapshot> {
         }
         final doc = snapshot.data!.data();
         if (doc != null) {
-          return IconButton(
-            icon: (widget.index > widget.medalCount - 1)
-                ? ColorFiltered(
-                    colorFilter: const ColorFilter.mode(
-                        Color.fromRGBO(11, 16, 64, 1), BlendMode.modulate),
-                    child: Image.asset("assets/medals/" + doc["name"] + ".png"),
-                  )
-                : Stack(children: [
-                    ColorFiltered(
-                      colorFilter: const ColorFilter.mode(
-                          Color.fromRGBO(7, 10, 41, 1), BlendMode.modulate),
-                      child: DropShadowImage(
-                        image: Image.asset(
+          return Column(
+            children: [
+              IconButton(
+                icon: (widget.index > widget.medalCount - 1)
+                    ? ColorFiltered(
+                        colorFilter: const ColorFilter.mode(
+                            Color.fromRGBO(11, 16, 64, 1), BlendMode.modulate),
+                        child: Image.asset(
                             "assets/medals/" + doc["name"] + ".png"),
-                        blurRadius: 5.0,
-                        offset: const Offset(3.0, 3.0),
-                      ),
-                    ),
-                    Image.asset("assets/medals/" + doc["name"] + ".png"),
-                  ]),
-            onPressed: () {
-              widget.onMedalsChanged();
-              if (widget.index == widget.maxMedals - 1) {
-                congratulationsDialogue();
-              }
-              widget.onConfettiBlast();
-            },
-            iconSize: 40,
+                      )
+                    : Stack(children: [
+                        ColorFiltered(
+                          colorFilter: const ColorFilter.mode(
+                              Color.fromRGBO(7, 10, 41, 1), BlendMode.modulate),
+                          child: DropShadowImage(
+                            image: Image.asset(
+                                "assets/medals/" + doc["name"] + ".png"),
+                            blurRadius: 5.0,
+                            offset: const Offset(3.0, 3.0),
+                          ),
+                        ),
+                        Image.asset("assets/medals/" + doc["name"] + ".png"),
+                      ]),
+                onPressed: () {
+                  widget.onMedalsChanged();
+                  if (widget.index == widget.maxMedals - 1) {
+                    congratulationsDialogue();
+                  }
+                  widget.onConfettiBlast();
+                },
+                iconSize: 40,
+              ),
+              Text(
+                "lvl: ${doc["lvl"]}",
+                textAlign: TextAlign.center,
+              ),
+            ],
           );
         } else {
           return const Center(child: Text("doc is null!"));
