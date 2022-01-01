@@ -86,6 +86,13 @@ class _RegionNameMapState extends State<RegionNameMap> {
             },
           ),
         );
+    await db.collection("regions").doc(path).collection("team").get().then(
+          (value) => value.docs.forEach(
+            (element) {
+              element.reference.delete();
+            },
+          ),
+        );
     await db.collection("regions").doc(path).update({"lives": 10});
     await db.collection("regions").doc(path).update({"medals": 0});
   }

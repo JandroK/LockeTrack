@@ -563,7 +563,10 @@ class _CheckBoxTextState extends State<CheckBoxText> {
     return Row(
       children: [
         OutlinedButton(
-          onPressed: () {
+          onPressed: () async {
+            if (widget.name == "Team") {
+              UpdateTeamMember(widget.doc, widget.active);
+            }
             widget.doc.update({
               '${widget.name[0].toLowerCase()}${widget.name.substring(1)}':
                   !widget.active,
@@ -582,6 +585,30 @@ class _CheckBoxTextState extends State<CheckBoxText> {
       ],
     );
   }
+}
+
+Future<void> UpdateTeamMember(
+    DocumentReference<Map<String, dynamic>> doc, bool active) async {
+  bool written = false;
+  await doc.parent.parent!.collection("team").orderBy("index").get().then(
+    (querySnapshot) {
+      for (var result in querySnapshot.docs) {
+        if (!written && !active && result.data()["reference"] == "") {
+          doc.parent.parent!
+              .collection("team")
+              .doc(result.id)
+              .update({"reference": doc.id});
+          written = true;
+        } else if (!written && active && result.data()["reference"] == doc.id) {
+          doc.parent.parent!
+              .collection("team")
+              .doc(result.id)
+              .update({"reference": ""});
+          written = true;
+        }
+      }
+    },
+  );
 }
 
 class InputText extends StatelessWidget {

@@ -1,8 +1,7 @@
-// ignore_for_file: must_be_immutable
+// ignore_for_file: must_be_immutable, non_constant_identifier_names, prefer_const_constructors
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:locketrack/custom_classes/medal.dart';
-import 'package:locketrack/screens/list_pokemon.dart';
 import 'package:drop_shadow_image/drop_shadow_image.dart';
 import 'package:confetti/confetti.dart';
 
@@ -28,6 +27,8 @@ class _CoachTokenState extends State<CoachToken> {
   late int gen = 0;
   bool confetti = false;
   List<String> medals = [];
+  List<String> team = [];
+  List<String> pokemonPaths = [];
 
   @override
   void initState() {
@@ -36,6 +37,7 @@ class _CoachTokenState extends State<CoachToken> {
     super.initState();
     db = widget.docID;
     generateMedals(db.collection("medals"), widget.medalsList);
+    generateTeam(db.collection("team"));
     getCoachInfo(db);
   }
 
@@ -71,7 +73,39 @@ class _CoachTokenState extends State<CoachToken> {
     });
     await db.get().then((value) => gen = value.data()?["gen"]);
     setState(() {
+      // ignore: avoid_print
       print("Medals loaded");
+    });
+  }
+
+  void generateTeam(CollectionReference<Map<String, dynamic>> collection) {
+    for (int i = 0; i < 6; i++) {
+      pokemonPaths.add("");
+    }
+    collection.get().then((value) async {
+      if (value.size == 0) {
+        for (int i = 0; i < 6; i++) {
+          await collection.add({
+            'reference': "",
+            'index': i,
+          });
+        }
+      }
+    }).then((value) => loadTeam());
+  }
+
+  void loadTeam() async {
+    await db.collection("team").orderBy("index").get().then((querySnapshot) {
+      for (var result in querySnapshot.docs) {
+        team.add(result.id);
+      }
+    });
+    for (int i = 0; i < 6; i++) {
+      if (team[i] != "") pokemonPaths[i] = await getPokemonPath(team[i]);
+    }
+    setState(() {
+      // ignore: avoid_print
+      print("Team loaded");
     });
   }
 
@@ -93,90 +127,75 @@ class _CoachTokenState extends State<CoachToken> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 0),
-                    child: Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            width: 3,
-                            color: const Color.fromRGBO(64, 70, 156, 1),
-                          ),
-                          color: const Color.fromRGBO(54, 59, 129, 1),
+                  CustomContainer(
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const CenteredHeader(
+                          text: "Medals",
                         ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const CenteredHeader(
-                              text: "Medals",
-                            ),
-                            if (gen != 7) MedalRow(0, medals.length ~/ 2),
-                            if (gen != 7)
-                              MedalRow(medals.length ~/ 2, medals.length),
-                            if (gen == 7) MedalRow(0, medals.length ~/ 3),
-                            if (gen == 7)
-                              MedalRow(
-                                  medals.length ~/ 3, medals.length ~/ 3 * 2),
-                            if (gen == 7)
-                              MedalRow(medals.length ~/ 3 * 2, medals.length),
-                          ],
-                        ),
-                      ),
+                        if (gen != 7) MedalRow(0, medals.length ~/ 2),
+                        if (gen != 7)
+                          MedalRow(medals.length ~/ 2, medals.length),
+                        if (gen == 7) MedalRow(0, medals.length ~/ 3),
+                        if (gen == 7)
+                          MedalRow(medals.length ~/ 3, medals.length ~/ 3 * 2),
+                        if (gen == 7)
+                          MedalRow(medals.length ~/ 3 * 2, medals.length),
+                        const Padding(padding: EdgeInsets.all(5)),
+                      ],
                     ),
+                    const Color.fromRGBO(64, 70, 156, 1),
+                    const Color.fromRGBO(54, 59, 129, 1),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 0),
-                    child: Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            width: 3,
-                            color: const Color.fromRGBO(207, 37, 37, 1),
+                  CustomContainer(
+                      Column(
+                        children: [
+                          const CenteredHeader(
+                            text: "Lives",
                           ),
-                          color: Colors.red[900],
-                        ),
-                        child: Column(
-                          children: [
-                            const CenteredHeader(
-                              text: "Lives",
-                            ),
-                            LiveRow(0, 5),
-                            LiveRow(5, 10),
-                          ],
-                        ),
+                          LiveRow(0, 5),
+                          LiveRow(5, 10),
+                        ],
                       ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 0),
-                    child: Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            width: 3,
-                            color: const Color.fromRGBO(20, 110, 34, 1),
+                      const Color.fromRGBO(207, 37, 37, 1),
+                      Colors.red[900]),
+                  CustomContainer(
+                      Column(
+                        children: [
+                          const CenteredHeader(
+                            text: "Team",
                           ),
-                          color: Colors.green[900],
-                        ),
-                        child: Column(
-                          children: [
-                            const CenteredHeader(
-                              text: "Team",
-                            ),
-                            LiveRow(0, 5),
-                            LiveRow(5, 10),
-                          ],
-                        ),
+                          TeamRow(0, 3),
+                          TeamRow(3, 6),
+                        ],
                       ),
-                    ),
-                  ),
+                      const Color.fromRGBO(20, 110, 34, 1),
+                      Colors.green[900]),
                 ],
               ),
             ),
     );
   }
 
-  // ignore: non_constant_identifier_names
+  Padding CustomContainer(Widget child, Color color1, Color? color2) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 0),
+      child: Expanded(
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              width: 3,
+              color: color1,
+            ),
+            color: color2,
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+
   Row LiveRow(int init, int length) {
     return Row(
       children: [
@@ -197,7 +216,43 @@ class _CoachTokenState extends State<CoachToken> {
     );
   }
 
-  // ignore: non_constant_identifier_names
+  Row TeamRow(int init, int length) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        for (int i = init; i < length; i++)
+          Expanded(
+            child: TeamSnapshot(
+              db: db,
+              path: pokemonPaths[i],
+              index: i,
+            ),
+          ),
+      ],
+    );
+  }
+
+  Future<String> getPokemonPath(String teamDocRef) async {
+    String ref = "";
+    var document = db.collection("team").doc(teamDocRef);
+    await document.get().then((snapshot) => {
+          ref = snapshot.data()?["reference"],
+        });
+    /*StreamBuilder(
+        stream: db.collection("medals").doc(teamDocRef).snapshots(),
+        builder: (
+          BuildContext context,
+          AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot,
+        ) {
+          final doc = snapshot.data!.data()!["reference"];
+          ref = doc!["reference"];
+          print("reference: $ref");
+          return Text(ref);
+        });*/
+    print("reference: $ref");
+    return ref;
+  }
+
   Row MedalRow(int init, int length) {
     return Row(
       children: [
@@ -504,6 +559,100 @@ class _HeartSnapshotState extends State<HeartSnapshot> {
             ]),
       onPressed: widget.onWidgetUpdate,
       iconSize: 50,
+    );
+  }
+}
+
+class TeamSnapshot extends StatefulWidget {
+  final int index;
+  final String path;
+  const TeamSnapshot({
+    required this.index,
+    required this.path,
+    required this.db,
+    Key? key,
+  }) : super(key: key);
+  final DocumentReference<Map<String, dynamic>> db;
+
+  @override
+  _TeamSnapshotState createState() => _TeamSnapshotState();
+}
+
+class _TeamSnapshotState extends State<TeamSnapshot> {
+  @override
+  Widget build(BuildContext context) {
+    if (widget.path != "") {
+      return StreamBuilder(
+        stream: widget.db.collection("routes").doc(widget.path).snapshots(),
+        builder: (
+          BuildContext context,
+          AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot,
+        ) {
+          if (!snapshot.hasData) {
+            return const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+          final routeDoc = snapshot.data!.data();
+          return Column(
+            children: [
+              Stack(
+                alignment: Alignment.bottomCenter,
+                children: [
+                  PokemonStand(),
+                  Image.asset(
+                    "assets/sprites/${routeDoc!["pokeObtNum"]}.png",
+                  ),
+                ],
+              ),
+              Padding(
+                padding: EdgeInsets.all(5),
+              ),
+              Text(
+                "${routeDoc!["pokeObt"]}",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      return Column(
+        // ignore: prefer_const_literals_to_create_immutables
+        children: [
+          PokemonStand(),
+          Padding(
+            padding: EdgeInsets.all(5),
+          ),
+          Text(
+            "Empty",
+            textAlign: TextAlign.center,
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          ),
+        ],
+      );
+    }
+  }
+}
+
+class PokemonStand extends StatelessWidget {
+  const PokemonStand({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      child: Container(
+        width: 100,
+        height: 50,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.elliptical(100, 50)),
+          color: Color.fromRGBO(22, 74, 36, 0.9),
+        ),
+      ),
     );
   }
 }
