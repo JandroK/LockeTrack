@@ -558,19 +558,26 @@ class CheckBoxText extends StatefulWidget {
 }
 
 class _CheckBoxTextState extends State<CheckBoxText> {
+  bool alert = false;
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         OutlinedButton(
           onPressed: () async {
+            bool full = false;
             if (widget.name == "Team") {
-              UpdateTeamMember(widget.doc, widget.active);
+              full = await UpdateTeamMember(widget.doc, widget.active);
             }
-            widget.doc.update({
-              '${widget.name[0].toLowerCase()}${widget.name.substring(1)}':
-                  !widget.active,
-            });
+            if (!full) {
+              widget.doc.update({
+                '${widget.name[0].toLowerCase()}${widget.name.substring(1)}':
+                    !widget.active,
+              });
+            } else {
+              WarningDialogue(context);
+            }
+            print(alert);
           },
           child: Text(
             widget.name,
@@ -585,30 +592,73 @@ class _CheckBoxTextState extends State<CheckBoxText> {
       ],
     );
   }
+
+  Future<dynamic> WarningDialogue(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text(
+            "WARNING",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: const Text(
+            "Team is full. Delete a tem member before adding a new one.",
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 16),
+          ),
+          actions: [
+            Center(
+              child: TextButton(
+                child: const Text(
+                  "OK",
+                  style: TextStyle(fontSize: 20),
+                ),
+                //onPressed: () => Navigator.of(context).pop(),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
 
-Future<void> UpdateTeamMember(
+// ignore: non_constant_identifier_names
+Future<bool> UpdateTeamMember(
     DocumentReference<Map<String, dynamic>> doc, bool active) async {
+  int pokemons = 0;
   bool written = false;
   await doc.parent.parent!.collection("team").orderBy("index").get().then(
-    (querySnapshot) {
+    (querySnapshot) async {
       for (var result in querySnapshot.docs) {
-        if (!written && !active && result.data()["reference"] == "") {
+        String reference = await result.data()["reference"];
+        if (!written && !active && reference == "") {
           doc.parent.parent!
               .collection("team")
               .doc(result.id)
               .update({"reference": doc.id});
           written = true;
-        } else if (!written && active && result.data()["reference"] == doc.id) {
+        } else if (!written && active && reference == doc.id) {
           doc.parent.parent!
               .collection("team")
               .doc(result.id)
               .update({"reference": ""});
           written = true;
         }
+        if (reference != "") {
+          pokemons++;
+        }
       }
     },
   );
+  return pokemons == 6;
 }
 
 class InputText extends StatelessWidget {
