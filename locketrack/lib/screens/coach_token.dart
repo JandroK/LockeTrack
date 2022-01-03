@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:locketrack/custom_classes/medal.dart';
 import 'package:drop_shadow_image/drop_shadow_image.dart';
 import 'package:confetti/confetti.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 
 class CoachToken extends StatefulWidget {
   final DocumentReference<Map<String, dynamic>> docID;
@@ -29,6 +30,9 @@ class _CoachTokenState extends State<CoachToken> {
   List<String> medals = [];
   List<String> team = [];
   List<String> pokemonPaths = [];
+  List<String> types = [];
+  List<String> vulnerableTypes = [];
+  bool overview = false;
 
   @override
   void initState() {
@@ -102,7 +106,31 @@ class _CoachTokenState extends State<CoachToken> {
     });
     for (int i = 0; i < 6; i++) {
       if (team[i] != "") pokemonPaths[i] = await getPokemonPath(team[i]);
+
+      // GET POKEMON TYPES
+      String type1 = "";
+      String type2 = "";
+      if (pokemonPaths[i].isNotEmpty) {
+        await db
+            .collection("routes")
+            .doc(pokemonPaths[i])
+            .get()
+            .then((value) => type1 = value.data()?["type1"]);
+        await db
+            .collection("routes")
+            .doc(pokemonPaths[i])
+            .get()
+            .then((value) => type2 = value.data()?["type2"]);
+        int index = -1;
+        if (type1 != "") {
+          if (!types.contains(type1)) types.add(type1);
+        }
+        if (type2 != "") {
+          if (!types.contains(type2)) types.add(type2);
+        }
+      }
     }
+    vulnerableTypes = calcTypeInteractions(types);
     setState(() {
       // ignore: avoid_print
       print("Team loaded");
@@ -120,6 +148,18 @@ class _CoachTokenState extends State<CoachToken> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Locke Progression"),
+        actions: [
+          TextButton(
+              onPressed: () {
+                setState(() {
+                  overview = !overview;
+                });
+              },
+              child: Text(
+                "Toggle InfoView",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ))
+        ],
       ),
       body: (medals.isEmpty)
           ? const Center(child: CircularProgressIndicator())
@@ -127,51 +167,65 @@ class _CoachTokenState extends State<CoachToken> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  CustomContainer(
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const CenteredHeader(
-                          text: "Medals",
-                        ),
-                        if (gen != 7) MedalRow(0, medals.length ~/ 2),
-                        if (gen != 7)
-                          MedalRow(medals.length ~/ 2, medals.length),
-                        if (gen == 7) MedalRow(0, medals.length ~/ 3),
-                        if (gen == 7)
-                          MedalRow(medals.length ~/ 3, medals.length ~/ 3 * 2),
-                        if (gen == 7)
-                          MedalRow(medals.length ~/ 3 * 2, medals.length),
-                        const Padding(padding: EdgeInsets.all(5)),
-                      ],
+                  if (!overview)
+                    CustomContainer(
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const CenteredHeader(
+                            text: "Medals",
+                          ),
+                          if (gen != 7) MedalRow(0, medals.length ~/ 2),
+                          if (gen != 7)
+                            MedalRow(medals.length ~/ 2, medals.length),
+                          if (gen == 7) MedalRow(0, medals.length ~/ 3),
+                          if (gen == 7)
+                            MedalRow(
+                                medals.length ~/ 3, medals.length ~/ 3 * 2),
+                          if (gen == 7)
+                            MedalRow(medals.length ~/ 3 * 2, medals.length),
+                          const Padding(padding: EdgeInsets.all(5)),
+                        ],
+                      ),
+                      const Color.fromRGBO(64, 70, 156, 1),
+                      const Color.fromRGBO(54, 59, 129, 1),
                     ),
-                    const Color.fromRGBO(64, 70, 156, 1),
-                    const Color.fromRGBO(54, 59, 129, 1),
-                  ),
-                  CustomContainer(
-                      Column(
-                        children: [
-                          const CenteredHeader(
-                            text: "Lives",
-                          ),
-                          LiveRow(0, 5),
-                          LiveRow(5, 10),
-                        ],
-                      ),
-                      const Color.fromRGBO(207, 37, 37, 1),
-                      Colors.red[900]),
-                  CustomContainer(
-                      Column(
-                        children: [
-                          const CenteredHeader(
-                            text: "Team",
-                          ),
-                          TeamRow(0, 3),
-                          TeamRow(3, 6),
-                        ],
-                      ),
-                      const Color.fromRGBO(20, 110, 34, 1),
-                      Colors.green[900]),
+                  if (!overview)
+                    CustomContainer(
+                        Column(
+                          children: [
+                            const CenteredHeader(
+                              text: "Lives",
+                            ),
+                            LiveRow(0, 5),
+                            LiveRow(5, 10),
+                          ],
+                        ),
+                        const Color.fromRGBO(207, 37, 37, 1),
+                        Colors.red[900]),
+                  if (!overview)
+                    CustomContainer(
+                        Column(
+                          children: [
+                            const CenteredHeader(
+                              text: "Team",
+                            ),
+                            TeamRow(0, 3),
+                            TeamRow(3, 6),
+                          ],
+                        ),
+                        const Color.fromRGBO(20, 110, 34, 1),
+                        Colors.green[900]),
+                  if (overview)
+                    Overview(
+                      lives: lives,
+                      medals: medalCount,
+                      maxMedals: medals.length,
+                      teamRow1: TeamRow(0, 3),
+                      teamRow2: TeamRow(3, 6),
+                      types: types,
+                      vulnerableTypes: vulnerableTypes,
+                    ),
                 ],
               ),
             ),
@@ -207,8 +261,8 @@ class _CoachTokenState extends State<CoachToken> {
             lives: lives,
             onWidgetUpdate: () {
               setState(() {
-                db.update({"lives": i + 1});
                 lives = i + 1;
+                db.update({"lives": lives});
               });
             },
           )),
@@ -216,19 +270,22 @@ class _CoachTokenState extends State<CoachToken> {
     );
   }
 
-  Row TeamRow(int init, int length) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        for (int i = init; i < length; i++)
-          Expanded(
-            child: TeamSnapshot(
-              db: db,
-              path: pokemonPaths[i],
-              index: i,
+  Padding TeamRow(int init, int length) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          for (int i = init; i < length; i++)
+            Expanded(
+              child: TeamSnapshot(
+                db: db,
+                path: pokemonPaths[i],
+                index: i,
+              ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -238,18 +295,6 @@ class _CoachTokenState extends State<CoachToken> {
     await document.get().then((snapshot) => {
           ref = snapshot.data()?["reference"],
         });
-    /*StreamBuilder(
-        stream: db.collection("medals").doc(teamDocRef).snapshots(),
-        builder: (
-          BuildContext context,
-          AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot,
-        ) {
-          final doc = snapshot.data!.data()!["reference"];
-          ref = doc!["reference"];
-          print("reference: $ref");
-          return Text(ref);
-        });*/
-    print("reference: $ref");
     return ref;
   }
 
@@ -610,7 +655,7 @@ class _TeamSnapshotState extends State<TeamSnapshot> {
                 padding: EdgeInsets.all(5),
               ),
               Text(
-                "${routeDoc!["pokeObt"]}",
+                "${routeDoc["pokeObt"]}",
                 textAlign: TextAlign.center,
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
               ),
@@ -655,4 +700,212 @@ class PokemonStand extends StatelessWidget {
       ),
     );
   }
+}
+
+class Overview extends StatefulWidget {
+  final int lives;
+  final int medals;
+  final int maxMedals;
+  final Padding teamRow1;
+  final Padding teamRow2;
+  final List<String> types;
+  final List<String> vulnerableTypes;
+  late int rows;
+  Overview({
+    required this.lives,
+    required this.medals,
+    required this.maxMedals,
+    required this.teamRow1,
+    required this.teamRow2,
+    required this.types,
+    required this.vulnerableTypes,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  _OverviewState createState() => _OverviewState();
+}
+
+class _OverviewState extends State<Overview> {
+  @override
+  void initState() {
+    widget.rows = (widget.vulnerableTypes.length / 3).ceil();
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          Text(
+            "OVERVIEW",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+          ),
+          Row(
+            children: [
+              CircularProgress(
+                data1: widget.medals,
+                data2: widget.maxMedals,
+                iconData: Icons.emoji_events,
+                color: Colors.blue,
+              ),
+              CircularProgress(
+                data1: widget.lives,
+                data2: 10,
+                iconData: Icons.favorite,
+                color: Colors.red,
+              ),
+            ],
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 6),
+          ),
+          Text(
+            "TEAM",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          widget.teamRow1,
+          widget.teamRow2,
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              "WEAK ENCOUNTERS",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          for (var item in widget.vulnerableTypes)
+            Padding(
+              padding: const EdgeInsets.all(3.0),
+              child: Text(item),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class CircularProgress extends StatelessWidget {
+  final int data1;
+  final int data2;
+  final IconData iconData;
+  final Color color;
+  const CircularProgress({
+    required this.data1,
+    required this.data2,
+    required this.iconData,
+    required this.color,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: CircularPercentIndicator(
+        radius: 100.0,
+        lineWidth: 10.0,
+        percent: data1 / data2,
+        center: Icon(
+          iconData,
+          size: 50.0,
+          color: color,
+        ),
+        backgroundColor: Colors.grey,
+        progressColor: color,
+        footer: Text("$data1 / $data2"),
+      ),
+    );
+  }
+}
+
+List<String> calcTypeInteractions(List<String> types) {
+  List<String> vulnerableTypes = [];
+
+  for (var item in types) {
+    if (item == "Normal") {
+      vulnerableTypes.add("Normal vs Fighting");
+    } else if (item == "Fire") {
+      vulnerableTypes.add("Fire vs Water");
+      vulnerableTypes.add("Fire vs Ground");
+      vulnerableTypes.add("Fire vs Rock");
+    } else if (item == "Water") {
+      vulnerableTypes.add("Water vs Grass");
+      vulnerableTypes.add("Water vs Electric");
+    } else if (item == "Grass") {
+      vulnerableTypes.add("Grass vs Fire");
+      vulnerableTypes.add("Grass vs Ice");
+      vulnerableTypes.add("Grass vs Poison");
+      vulnerableTypes.add("Grass vs Flying");
+      vulnerableTypes.add("Grass vs Bug");
+    } else if (item == "Electric") {
+      vulnerableTypes.add("Electric vs Ground");
+    } else if (item == "Ice") {
+      vulnerableTypes.add("Ice vs Fire");
+      vulnerableTypes.add("Ice vs Fighting");
+      vulnerableTypes.add("Ice vs Rock");
+      vulnerableTypes.add("Ice vs Steel");
+    } else if (item == "Fighting") {
+      vulnerableTypes.add("Fighting vs Flying");
+      vulnerableTypes.add("Fighting vs Psychic");
+      vulnerableTypes.add("Fighting vs Fairy");
+    } else if (item == "Poison") {
+      vulnerableTypes.add("Poison vs Ground");
+      vulnerableTypes.add("Poison vs Psychic");
+    } else if (item == "Ground") {
+      vulnerableTypes.add("Ground vs Water");
+      vulnerableTypes.add("Ground vs Grass");
+      vulnerableTypes.add("Ground vs Ice");
+    } else if (item == "Flying") {
+      vulnerableTypes.add("Flying vs Electric");
+      vulnerableTypes.add("Flying vs Ice");
+      vulnerableTypes.add("Flying vs Rock");
+    } else if (item == "Psychic") {
+      vulnerableTypes.add("Psychic vs Bug");
+      vulnerableTypes.add("Psychic vs Ghost");
+      vulnerableTypes.add("Psychic vs Dark");
+    } else if (item == "Bug") {
+      vulnerableTypes.add("Bug vs Flying");
+      vulnerableTypes.add("Bug vs Rock");
+      vulnerableTypes.add("Bug vs Fire");
+    } else if (item == "Rock") {
+      vulnerableTypes.add("Rock vs Water");
+      vulnerableTypes.add("Rock vs Grass");
+      vulnerableTypes.add("Rock vs Fighting");
+      vulnerableTypes.add("Rock vs Ground");
+      vulnerableTypes.add("Rock vs Steel");
+    } else if (item == "Ghost") {
+      vulnerableTypes.add("Ghost vs Ghost");
+      vulnerableTypes.add("Ghost vs Dark");
+    } else if (item == "Dark") {
+      vulnerableTypes.add("Dark vs Fighting");
+      vulnerableTypes.add("Dark vs Bug");
+      vulnerableTypes.add("Dark vs Fairy");
+    } else if (item == "Dragon") {
+      vulnerableTypes.add("Dragon vs Ice");
+      vulnerableTypes.add("Dragon vs Dragon");
+      vulnerableTypes.add("Dragon vs Fairy");
+    } else if (item == "Steel") {
+      vulnerableTypes.add("Steel vs Fire");
+      vulnerableTypes.add("Steel vs Fighting");
+      vulnerableTypes.add("Steel vs Ground");
+    } else if (item == "Fairy") {
+      vulnerableTypes.add("Fairy vs Poison");
+      vulnerableTypes.add("Fairy vs Steel");
+    }
+  }
+  return vulnerableTypes;
 }

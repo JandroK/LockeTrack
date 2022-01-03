@@ -63,6 +63,8 @@ class _RouteScreenState extends State<RouteScreen> {
             'pokeObtNum': "",
             'pokeDelNum': "",
             'status': "",
+            'type1': "",
+            'type2': "",
             'failed': false,
             'dead': false,
             'shiny': false,
@@ -431,10 +433,14 @@ class _PokemonSpriteState extends State<PokemonSprite> {
                   ? widget.doc.update({
                       'pokeObt': value.name,
                       'pokeObtNum': value.numberDex.toString().substring(1),
+                      'type1': value.types[0],
+                      'type2': value.types[1],
                     })
                   : widget.doc.update({
                       'pokeDel': value.name,
                       'pokeDelNum': value.numberDex.toString().substring(1),
+                      'type1': value.types[0],
+                      'type2': value.types[1],
                     });
             });
           }
@@ -577,7 +583,6 @@ class _CheckBoxTextState extends State<CheckBoxText> {
             } else {
               WarningDialogue(context);
             }
-            print(alert);
           },
           child: Text(
             widget.name,
