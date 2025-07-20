@@ -785,7 +785,7 @@ class CircularProgress extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: CircularPercentIndicator(
-        radius: 100.0,
+        radius: 80.0,
         lineWidth: 10.0,
         percent: data1 / data2,
         center: Icon(iconData, size: 50.0, color: color),
