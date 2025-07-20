@@ -237,15 +237,13 @@ class _CoachTokenState extends State<CoachToken> {
 
   Padding CustomContainer(Widget child, Color color1, Color? color2) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 8.0, 0, 0),
-      child: Expanded(
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(width: 3, color: color1),
-            color: color2,
-          ),
-          child: child,
+      padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(width: 3, color: color1),
+          color: color2,
         ),
+        child: child,
       ),
     );
   }
@@ -529,7 +527,7 @@ class _MedalSnapshotState extends State<MedalSnapshot> {
                     },
                     iconSize: 40,
                   ),
-                  Text("lvl: ${doc["lvl"]}", textAlign: TextAlign.center),
+                  Text("Lvl: ${doc["lvl"]}", textAlign: TextAlign.center),
                 ],
               );
             } else {
