@@ -259,7 +259,7 @@ class _CoachTokenState extends State<CoachToken> {
               lives: lives,
               onWidgetUpdate: () {
                 setState(() {
-                  lives = i + 1;
+                  lives = (lives == i + 1) ? i : i + 1;
                   db.update({"lives": lives});
                 });
               },
@@ -307,8 +307,8 @@ class _CoachTokenState extends State<CoachToken> {
               medalCount: medalCount,
               onMedalsChanged: () {
                 setState(() {
-                  db.update({"medals": i + 1});
-                  medalCount = i + 1;
+                  medalCount = (medalCount == i + 1) ? i : i + 1;
+                  db.update({"medals": medalCount});
                 });
               },
               onConfettiBlast: () {
