@@ -30,23 +30,24 @@ class Pokemon {
     var list = parsedJson['type'];
     List<String> typesList = List<String>.from(list);
     return Pokemon(
-        numberDex: getNumberDex(parsedJson['id']),
-        name: parsedJson['name']['english'],
-        types: typesList);
+      numberDex: getNumberDex(parsedJson['id']),
+      name: parsedJson['name']['english'],
+      types: typesList,
+    );
   }
 
   Pokemon.fromFireBase(Map<String, dynamic> doc)
-      : numberDex = doc['number_dex'],
-        name = doc['name'],
-        types = [doc['type1'], doc['type2']];
+    : numberDex = doc['number_dex'],
+      name = doc['name'],
+      types = [doc['type1'], doc['type2']];
 }
 
 String getNumberDex(int number) {
   String numberDex = "#";
   if (number < 10) {
-    numberDex += "00" + number.toString();
+    numberDex += "00$number";
   } else if (number < 100) {
-    numberDex += "0" + number.toString();
+    numberDex += "0$number";
   } else {
     numberDex += number.toString();
   }

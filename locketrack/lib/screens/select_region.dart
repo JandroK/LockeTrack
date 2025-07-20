@@ -5,10 +5,7 @@ import 'package:locketrack/screens/routes_screen.dart';
 
 class RegionNameMap extends StatefulWidget {
   DocumentReference<Map<String, dynamic>> db;
-  RegionNameMap({
-    required this.db,
-    Key? key,
-  }) : super(key: key);
+  RegionNameMap({required this.db, super.key});
 
   @override
   State<RegionNameMap> createState() => _RegionNameMapState();
@@ -25,7 +22,7 @@ class _RegionNameMapState extends State<RegionNameMap> {
     "Black and White",
     "X and Y",
     "Sun and Moon",
-    "Sword and Shield"
+    "Sword and Shield",
   ];
   final List<String> imagePath = [
     "kanto_map.png",
@@ -35,36 +32,44 @@ class _RegionNameMapState extends State<RegionNameMap> {
     "teselia_map.png",
     "kalos_map.png",
     "alola_map.png",
-    "galar_map.png"
+    "galar_map.png",
   ];
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     db = widget.db;
     generateRegions(db.collection("regions"), nameGames);
   }
 
-  void generateRegions(CollectionReference<Map<String, dynamic>> collection,
-      List<String> nameGames) {
-    collection.get().then((value) {
-      if (value.size == 0) {
-        int i = 1;
-        nameGames.forEach((element) async {
-          await collection
-              .add({'gen': i++, 'name': element, 'medals': 0, 'lives': 10});
-        });
-      }
-    }).then((value) => loadRegions());
+  void generateRegions(
+    CollectionReference<Map<String, dynamic>> collection,
+    List<String> nameGames,
+  ) {
+    collection
+        .get()
+        .then((value) {
+          if (value.size == 0) {
+            int i = 1;
+            nameGames.forEach((element) async {
+              await collection.add({
+                'gen': i++,
+                'name': element,
+                'medals': 0,
+                'lives': 10,
+              });
+            });
+          }
+        })
+        .then((value) => loadRegions());
   }
 
   void loadRegions() async {
     await db.collection("regions").orderBy("gen").get().then((querySnapshot) {
-      querySnapshot.docs.forEach((result) {
+      for (var result in querySnapshot.docs) {
         regions.add(result.id);
         print(result.id);
-      });
+      }
     });
     setState(() {
       print("Ya he cargado las regiones");
@@ -72,26 +77,35 @@ class _RegionNameMapState extends State<RegionNameMap> {
   }
 
   void deleteRegion(String path) async {
-    await db.collection("regions").doc(path).collection("routes").get().then(
-          (value) => value.docs.forEach(
-            (element) {
-              element.reference.delete();
-            },
-          ),
+    await db
+        .collection("regions")
+        .doc(path)
+        .collection("routes")
+        .get()
+        .then(
+          (value) => value.docs.forEach((element) {
+            element.reference.delete();
+          }),
         );
-    await db.collection("regions").doc(path).collection("medals").get().then(
-          (value) => value.docs.forEach(
-            (element) {
-              element.reference.delete();
-            },
-          ),
+    await db
+        .collection("regions")
+        .doc(path)
+        .collection("medals")
+        .get()
+        .then(
+          (value) => value.docs.forEach((element) {
+            element.reference.delete();
+          }),
         );
-    await db.collection("regions").doc(path).collection("team").get().then(
-          (value) => value.docs.forEach(
-            (element) {
-              element.reference.delete();
-            },
-          ),
+    await db
+        .collection("regions")
+        .doc(path)
+        .collection("team")
+        .get()
+        .then(
+          (value) => value.docs.forEach((element) {
+            element.reference.delete();
+          }),
         );
     await db.collection("regions").doc(path).update({"lives": 10});
     await db.collection("regions").doc(path).update({"medals": 0});
@@ -100,14 +114,16 @@ class _RegionNameMapState extends State<RegionNameMap> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Pokémon regions"), actions: [
-        IconButton(
-          icon: const Icon(Icons.logout),
+      appBar: AppBar(
+        title: const Text("Pokémon regions"),
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.logout_rounded),
           onPressed: () {
             FirebaseAuth.instance.signOut();
           },
-        )
-      ]),
+        ),
+      ),
       body: (regions.isEmpty)
           ? const Center(child: CircularProgressIndicator())
           : Column(
@@ -117,12 +133,14 @@ class _RegionNameMapState extends State<RegionNameMap> {
                   child: ListView(
                     children: [
                       const SizedBox(height: 10),
-                      const Text("Select Region",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              decoration: TextDecoration.underline,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 24)),
+                      const Text(
+                        "Choose Region",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 24,
+                        ),
+                      ),
                       const SizedBox(height: 5),
                       for (int i = 0; i < imagePath.length; i++)
                         Padding(
@@ -132,12 +150,28 @@ class _RegionNameMapState extends State<RegionNameMap> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(25),
                               image: DecorationImage(
-                                image:
-                                    AssetImage("assets/maps/${imagePath[i]}"),
+                                image: AssetImage(
+                                  "assets/maps/${imagePath[i]}",
+                                ),
                                 fit: BoxFit.cover,
                               ),
                             ),
                             child: InkWell(
+                              borderRadius: const BorderRadius.all(
+                                Radius.circular(25),
+                              ),
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => RouteScreen(
+                                      docID: db
+                                          .collection("regions")
+                                          .doc(regions[i]),
+                                      index: i,
+                                    ),
+                                  ),
+                                );
+                              },
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: GestureDetector(
@@ -145,34 +179,22 @@ class _RegionNameMapState extends State<RegionNameMap> {
                                     deleteRegion(regions[i]);
                                   },
                                   child: const Align(
-                                      alignment: Alignment.topRight,
-                                      child: Icon(
-                                        Icons.refresh_rounded,
-                                        color: Colors.black,
-                                        size: 30,
-                                      )),
+                                    alignment: Alignment.topRight,
+                                    child: Icon(
+                                      Icons.refresh_rounded,
+                                      color: Colors.black,
+                                      size: 30,
+                                    ),
+                                  ),
                                 ),
                               ),
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(25)),
-                              onTap: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) => RouteScreen(
-                                        docID: db
-                                            .collection("regions")
-                                            .doc(regions[i]),
-                                        index: i),
-                                  ),
-                                );
-                              },
                             ),
                           ),
                         ),
-                      const SizedBox(height: 10)
+                      const SizedBox(height: 10),
                     ],
                   ),
-                )
+                ),
               ],
             ),
     );

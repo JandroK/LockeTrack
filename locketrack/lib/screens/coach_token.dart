@@ -14,8 +14,8 @@ class CoachToken extends StatefulWidget {
     required this.docID,
     required this.medalsList,
     required this.gameName,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<CoachToken> createState() => _CoachTokenState();
@@ -52,21 +52,26 @@ class _CoachTokenState extends State<CoachToken> {
     super.dispose();
   }
 
-  void generateMedals(CollectionReference<Map<String, dynamic>> collection,
-      List<Medal> medals) {
-    collection.get().then((value) {
-      if (value.size == 0) {
-        int i = 1;
-        // ignore: avoid_function_literals_in_foreach_calls
-        medals.forEach((element) async {
-          await collection.add({
-            'name': element.name,
-            'lvl': element.lvl,
-            'index': i++,
-          });
-        });
-      }
-    }).then((value) => loadMedals());
+  void generateMedals(
+    CollectionReference<Map<String, dynamic>> collection,
+    List<Medal> medals,
+  ) {
+    collection
+        .get()
+        .then((value) {
+          if (value.size == 0) {
+            int i = 1;
+            // ignore: avoid_function_literals_in_foreach_calls
+            medals.forEach((element) async {
+              await collection.add({
+                'name': element.name,
+                'lvl': element.lvl,
+                'index': i++,
+              });
+            });
+          }
+        })
+        .then((value) => loadMedals());
   }
 
   void loadMedals() async {
@@ -86,16 +91,16 @@ class _CoachTokenState extends State<CoachToken> {
     for (int i = 0; i < 6; i++) {
       pokemonPaths.add("");
     }
-    collection.get().then((value) async {
-      if (value.size == 0) {
-        for (int i = 0; i < 6; i++) {
-          await collection.add({
-            'reference': "",
-            'index': i,
-          });
-        }
-      }
-    }).then((value) => loadTeam());
+    collection
+        .get()
+        .then((value) async {
+          if (value.size == 0) {
+            for (int i = 0; i < 6; i++) {
+              await collection.add({'reference': "", 'index': i});
+            }
+          }
+        })
+        .then((value) => loadTeam());
   }
 
   void loadTeam() async {
@@ -121,7 +126,6 @@ class _CoachTokenState extends State<CoachToken> {
             .doc(pokemonPaths[i])
             .get()
             .then((value) => type2 = value.data()?["type2"]);
-        int index = -1;
         if (type1 != "") {
           if (!types.contains(type1)) types.add(type1);
         }
@@ -150,15 +154,16 @@ class _CoachTokenState extends State<CoachToken> {
         title: const Text("Locke Progression"),
         actions: [
           TextButton(
-              onPressed: () {
-                setState(() {
-                  overview = !overview;
-                });
-              },
-              child: Text(
-                "Toggle InfoView",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ))
+            onPressed: () {
+              setState(() {
+                overview = !overview;
+              });
+            },
+            child: Text(
+              "Toggle InfoView",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
         ],
       ),
       body: (medals.isEmpty)
@@ -172,16 +177,16 @@ class _CoachTokenState extends State<CoachToken> {
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const CenteredHeader(
-                            text: "Medals",
-                          ),
+                          const CenteredHeader(text: "Medals"),
                           if (gen != 7) MedalRow(0, medals.length ~/ 2),
                           if (gen != 7)
                             MedalRow(medals.length ~/ 2, medals.length),
                           if (gen == 7) MedalRow(0, medals.length ~/ 3),
                           if (gen == 7)
                             MedalRow(
-                                medals.length ~/ 3, medals.length ~/ 3 * 2),
+                              medals.length ~/ 3,
+                              medals.length ~/ 3 * 2,
+                            ),
                           if (gen == 7)
                             MedalRow(medals.length ~/ 3 * 2, medals.length),
                           const Padding(padding: EdgeInsets.all(5)),
@@ -192,30 +197,28 @@ class _CoachTokenState extends State<CoachToken> {
                     ),
                   if (!overview)
                     CustomContainer(
-                        Column(
-                          children: [
-                            const CenteredHeader(
-                              text: "Lives",
-                            ),
-                            LiveRow(0, 5),
-                            LiveRow(5, 10),
-                          ],
-                        ),
-                        const Color.fromRGBO(207, 37, 37, 1),
-                        Colors.red[900]),
+                      Column(
+                        children: [
+                          const CenteredHeader(text: "Lives"),
+                          LiveRow(0, 5),
+                          LiveRow(5, 10),
+                        ],
+                      ),
+                      const Color.fromRGBO(207, 37, 37, 1),
+                      Colors.red[900],
+                    ),
                   if (!overview)
                     CustomContainer(
-                        Column(
-                          children: [
-                            const CenteredHeader(
-                              text: "Team",
-                            ),
-                            TeamRow(0, 3),
-                            TeamRow(3, 6),
-                          ],
-                        ),
-                        const Color.fromRGBO(20, 110, 34, 1),
-                        Colors.green[900]),
+                      Column(
+                        children: [
+                          const CenteredHeader(text: "Team"),
+                          TeamRow(0, 3),
+                          TeamRow(3, 6),
+                        ],
+                      ),
+                      const Color.fromRGBO(20, 110, 34, 1),
+                      Colors.green[900],
+                    ),
                   if (overview)
                     Overview(
                       lives: lives,
@@ -238,10 +241,7 @@ class _CoachTokenState extends State<CoachToken> {
       child: Expanded(
         child: Container(
           decoration: BoxDecoration(
-            border: Border.all(
-              width: 3,
-              color: color1,
-            ),
+            border: Border.all(width: 3, color: color1),
             color: color2,
           ),
           child: child,
@@ -255,17 +255,18 @@ class _CoachTokenState extends State<CoachToken> {
       children: [
         for (int i = init; i < length; i++)
           Expanded(
-              child: HeartSnapshot(
-            db: db,
-            index: i,
-            lives: lives,
-            onWidgetUpdate: () {
-              setState(() {
-                lives = i + 1;
-                db.update({"lives": lives});
-              });
-            },
-          )),
+            child: HeartSnapshot(
+              db: db,
+              index: i,
+              lives: lives,
+              onWidgetUpdate: () {
+                setState(() {
+                  lives = i + 1;
+                  db.update({"lives": lives});
+                });
+              },
+            ),
+          ),
       ],
     );
   }
@@ -278,11 +279,7 @@ class _CoachTokenState extends State<CoachToken> {
         children: [
           for (int i = init; i < length; i++)
             Expanded(
-              child: TeamSnapshot(
-                db: db,
-                path: pokemonPaths[i],
-                index: i,
-              ),
+              child: TeamSnapshot(db: db, path: pokemonPaths[i], index: i),
             ),
         ],
       ),
@@ -292,9 +289,9 @@ class _CoachTokenState extends State<CoachToken> {
   Future<String> getPokemonPath(String teamDocRef) async {
     String ref = "";
     var document = db.collection("team").doc(teamDocRef);
-    await document.get().then((snapshot) => {
-          ref = snapshot.data()?["reference"],
-        });
+    await document.get().then(
+      (snapshot) => {ref = snapshot.data()?["reference"]},
+    );
     return ref;
   }
 
@@ -329,9 +326,7 @@ class _CoachTokenState extends State<CoachToken> {
 }
 
 class Confetti extends StatefulWidget {
-  const Confetti({
-    Key? key,
-  }) : super(key: key);
+  const Confetti({super.key});
 
   @override
   State<Confetti> createState() => _ConfettiState();
@@ -386,10 +381,7 @@ int calcEnd(int i, int length) {
 
 class CenteredHeader extends StatelessWidget {
   final String text;
-  const CenteredHeader({
-    required this.text,
-    Key? key,
-  }) : super(key: key);
+  const CenteredHeader({required this.text, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -398,10 +390,7 @@ class CenteredHeader extends StatelessWidget {
       child: Center(
         child: Text(
           text,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
       ),
     );
@@ -425,8 +414,8 @@ class MedalSnapshot extends StatefulWidget {
     required this.db,
     required this.onMedalsChanged,
     required this.onConfettiBlast,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final DocumentReference<Map<String, dynamic>> db;
 
@@ -443,20 +432,13 @@ class _MedalSnapshotState extends State<MedalSnapshot> {
           title: const Text(
             "CONGRATULATIONS!",
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
           elevation: 24.0,
           backgroundColor: const Color.fromRGBO(46, 46, 46, 1),
           shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(30),
-            ),
-            side: BorderSide(
-              width: 3,
-              color: Colors.black,
-            ),
+            borderRadius: BorderRadius.all(Radius.circular(30)),
+            side: BorderSide(width: 3, color: Colors.black),
           ),
           content: SizedBox(
             width: 50,
@@ -467,17 +449,14 @@ class _MedalSnapshotState extends State<MedalSnapshot> {
                   "You completed your ${widget.gameName} nuzlocke run!",
                   textAlign: TextAlign.center,
                 ),
-                const Confetti()
+                const Confetti(),
               ],
             ),
           ),
           actions: [
             Center(
               child: TextButton(
-                child: const Text(
-                  "OK",
-                  style: TextStyle(fontSize: 20),
-                ),
+                child: const Text("OK", style: TextStyle(fontSize: 20)),
                 //onPressed: () => Navigator.of(context).pop(),
                 onPressed: () {
                   widget.onConfettiBlast();
@@ -495,60 +474,68 @@ class _MedalSnapshotState extends State<MedalSnapshot> {
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: widget.db.collection("medals").doc(widget.path).snapshots(),
-      builder: (
-        BuildContext context,
-        AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot,
-      ) {
-        if (!snapshot.hasData) {
-          return const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Center(child: CircularProgressIndicator()),
-          );
-        }
-        final doc = snapshot.data!.data();
-        if (doc != null) {
-          return Column(
-            children: [
-              IconButton(
-                icon: (widget.index > widget.medalCount - 1)
-                    ? ColorFiltered(
-                        colorFilter: const ColorFilter.mode(
-                            Color.fromRGBO(11, 16, 64, 1), BlendMode.modulate),
-                        child: Image.asset(
-                            "assets/medals/" + doc["name"] + ".png"),
-                      )
-                    : Stack(children: [
-                        ColorFiltered(
-                          colorFilter: const ColorFilter.mode(
-                              Color.fromRGBO(7, 10, 41, 1), BlendMode.modulate),
-                          child: DropShadowImage(
-                            image: Image.asset(
-                                "assets/medals/" + doc["name"] + ".png"),
-                            blurRadius: 5.0,
-                            offset: const Offset(3.0, 3.0),
+      builder:
+          (
+            BuildContext context,
+            AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot,
+          ) {
+            if (!snapshot.hasData) {
+              return const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            final doc = snapshot.data!.data();
+            if (doc != null) {
+              return Column(
+                children: [
+                  IconButton(
+                    icon: (widget.index > widget.medalCount - 1)
+                        ? ColorFiltered(
+                            colorFilter: const ColorFilter.mode(
+                              Color.fromRGBO(11, 16, 64, 1),
+                              BlendMode.modulate,
+                            ),
+                            child: Image.asset(
+                              "assets/medals/" + doc["name"] + ".png",
+                            ),
+                          )
+                        : Stack(
+                            children: [
+                              ColorFiltered(
+                                colorFilter: const ColorFilter.mode(
+                                  Color.fromRGBO(7, 10, 41, 1),
+                                  BlendMode.modulate,
+                                ),
+                                child: DropShadowImage(
+                                  image: Image.asset(
+                                    "assets/medals/" + doc["name"] + ".png",
+                                  ),
+                                  blurRadius: 5.0,
+                                  offset: const Offset(3.0, 3.0),
+                                ),
+                              ),
+                              Image.asset(
+                                "assets/medals/" + doc["name"] + ".png",
+                              ),
+                            ],
                           ),
-                        ),
-                        Image.asset("assets/medals/" + doc["name"] + ".png"),
-                      ]),
-                onPressed: () {
-                  widget.onMedalsChanged();
-                  if (widget.index == widget.maxMedals - 1) {
-                    congratulationsDialogue();
-                  }
-                  widget.onConfettiBlast();
-                },
-                iconSize: 40,
-              ),
-              Text(
-                "lvl: ${doc["lvl"]}",
-                textAlign: TextAlign.center,
-              ),
-            ],
-          );
-        } else {
-          return const Center(child: Text("doc is null!"));
-        }
-      },
+                    onPressed: () {
+                      widget.onMedalsChanged();
+                      if (widget.index == widget.maxMedals - 1) {
+                        congratulationsDialogue();
+                      }
+                      widget.onConfettiBlast();
+                    },
+                    iconSize: 40,
+                  ),
+                  Text("lvl: ${doc["lvl"]}", textAlign: TextAlign.center),
+                ],
+              );
+            } else {
+              return const Center(child: Text("doc is null!"));
+            }
+          },
     );
   }
 }
@@ -562,8 +549,8 @@ class HeartSnapshot extends StatefulWidget {
     required this.lives,
     required this.db,
     required this.onWidgetUpdate,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final DocumentReference<Map<String, dynamic>> db;
 
@@ -578,30 +565,36 @@ class _HeartSnapshotState extends State<HeartSnapshot> {
       icon: (widget.index > widget.lives - 1)
           ? ColorFiltered(
               colorFilter: const ColorFilter.mode(
-                  Color.fromRGBO(38, 8, 8, 1), BlendMode.modulate),
+                Color.fromRGBO(38, 8, 8, 1),
+                BlendMode.modulate,
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Image.asset("assets/heart.png"),
               ),
             )
-          : Stack(children: [
-              ColorFiltered(
-                colorFilter: const ColorFilter.mode(
-                    Color.fromRGBO(18, 4, 4, 1), BlendMode.modulate),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: DropShadowImage(
-                    image: Image.asset("assets/heart.png"),
-                    blurRadius: 5.0,
-                    offset: const Offset(3.0, 3.0),
+          : Stack(
+              children: [
+                ColorFiltered(
+                  colorFilter: const ColorFilter.mode(
+                    Color.fromRGBO(18, 4, 4, 1),
+                    BlendMode.modulate,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: DropShadowImage(
+                      image: Image.asset("assets/heart.png"),
+                      blurRadius: 5.0,
+                      offset: const Offset(3.0, 3.0),
+                    ),
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Image.asset("assets/heart.png"),
-              ),
-            ]),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Image.asset("assets/heart.png"),
+                ),
+              ],
+            ),
       onPressed: widget.onWidgetUpdate,
       iconSize: 50,
     );
@@ -615,8 +608,8 @@ class TeamSnapshot extends StatefulWidget {
     required this.index,
     required this.path,
     required this.db,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
   final DocumentReference<Map<String, dynamic>> db;
 
   @override
@@ -629,48 +622,45 @@ class _TeamSnapshotState extends State<TeamSnapshot> {
     if (widget.path != "") {
       return StreamBuilder(
         stream: widget.db.collection("routes").doc(widget.path).snapshots(),
-        builder: (
-          BuildContext context,
-          AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot,
-        ) {
-          if (!snapshot.hasData) {
-            return const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Center(child: CircularProgressIndicator()),
-            );
-          }
-          final routeDoc = snapshot.data!.data();
-          return Column(
-            children: [
-              Stack(
-                alignment: Alignment.bottomCenter,
+        builder:
+            (
+              BuildContext context,
+              AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot,
+            ) {
+              if (!snapshot.hasData) {
+                return const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+              final routeDoc = snapshot.data!.data();
+              return Column(
                 children: [
-                  PokemonStand(),
-                  Image.asset(
-                    "assets/sprites/${routeDoc!["pokeObtNum"]}.png",
+                  Stack(
+                    alignment: Alignment.bottomCenter,
+                    children: [
+                      PokemonStand(),
+                      Image.asset(
+                        "assets/sprites/${routeDoc!["pokeObtNum"]}.png",
+                      ),
+                    ],
+                  ),
+                  Padding(padding: EdgeInsets.all(5)),
+                  Text(
+                    "${routeDoc["pokeObt"]}",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                   ),
                 ],
-              ),
-              Padding(
-                padding: EdgeInsets.all(5),
-              ),
-              Text(
-                "${routeDoc["pokeObt"]}",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-              ),
-            ],
-          );
-        },
+              );
+            },
       );
     } else {
       return Column(
         // ignore: prefer_const_literals_to_create_immutables
         children: [
           PokemonStand(),
-          Padding(
-            padding: EdgeInsets.all(5),
-          ),
+          Padding(padding: EdgeInsets.all(5)),
           Text(
             "Empty",
             textAlign: TextAlign.center,
@@ -683,9 +673,7 @@ class _TeamSnapshotState extends State<TeamSnapshot> {
 }
 
 class PokemonStand extends StatelessWidget {
-  const PokemonStand({
-    Key? key,
-  }) : super(key: key);
+  const PokemonStand({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -719,8 +707,8 @@ class Overview extends StatefulWidget {
     required this.teamRow2,
     required this.types,
     required this.vulnerableTypes,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   _OverviewState createState() => _OverviewState();
@@ -730,7 +718,6 @@ class _OverviewState extends State<Overview> {
   @override
   void initState() {
     widget.rows = (widget.vulnerableTypes.length / 3).ceil();
-    // TODO: implement initState
     super.initState();
   }
 
@@ -742,14 +729,9 @@ class _OverviewState extends State<Overview> {
         children: [
           Text(
             "OVERVIEW",
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-          ),
+          Padding(padding: EdgeInsets.symmetric(vertical: 8)),
           Row(
             children: [
               CircularProgress(
@@ -766,15 +748,10 @@ class _OverviewState extends State<Overview> {
               ),
             ],
           ),
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 6),
-          ),
+          Padding(padding: EdgeInsets.symmetric(vertical: 6)),
           Text(
             "TEAM",
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           widget.teamRow1,
           widget.teamRow2,
@@ -782,17 +759,11 @@ class _OverviewState extends State<Overview> {
             padding: const EdgeInsets.all(8.0),
             child: Text(
               "WEAK ENCOUNTERS",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ),
           for (var item in widget.vulnerableTypes)
-            Padding(
-              padding: const EdgeInsets.all(3.0),
-              child: Text(item),
-            ),
+            Padding(padding: const EdgeInsets.all(3.0), child: Text(item)),
         ],
       ),
     );
@@ -809,8 +780,8 @@ class CircularProgress extends StatelessWidget {
     required this.data2,
     required this.iconData,
     required this.color,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -819,11 +790,7 @@ class CircularProgress extends StatelessWidget {
         radius: 100.0,
         lineWidth: 10.0,
         percent: data1 / data2,
-        center: Icon(
-          iconData,
-          size: 50.0,
-          color: color,
-        ),
+        center: Icon(iconData, size: 50.0, color: color),
         backgroundColor: Colors.grey,
         progressColor: color,
         footer: Text("$data1 / $data2"),

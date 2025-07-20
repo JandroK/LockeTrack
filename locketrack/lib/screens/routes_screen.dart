@@ -13,11 +13,7 @@ bool search = false;
 class RouteScreen extends StatefulWidget {
   DocumentReference<Map<String, dynamic>> docID;
   final int index;
-  RouteScreen({
-    required this.docID,
-    required this.index,
-    Key? key,
-  }) : super(key: key);
+  RouteScreen({required this.docID, required this.index, super.key});
 
   @override
   State<RouteScreen> createState() => _RouteScreenState();
@@ -31,7 +27,6 @@ class _RouteScreenState extends State<RouteScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     db = widget.docID;
     generateRoutes(db.collection("routes"), regionRouteList[widget.index]);
@@ -41,7 +36,6 @@ class _RouteScreenState extends State<RouteScreen> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     controller.dispose();
     super.dispose();
   }
@@ -50,37 +44,42 @@ class _RouteScreenState extends State<RouteScreen> {
     await doc.get().then((value) => gameName = value.data()?["name"]);
   }
 
-  void generateRoutes(CollectionReference<Map<String, dynamic>> collection,
-      List<String> routeName) {
-    collection.get().then((value) {
-      if (value.size == 0) {
-        int i = 0;
-        routeName.forEach((element) async {
-          await collection.add({
-            'nombre': element,
-            'pokeObt': "",
-            'pokeDel': "",
-            'pokeObtNum': "",
-            'pokeDelNum': "",
-            'status': "",
-            'type1': "",
-            'type2': "",
-            'failed': false,
-            'dead': false,
-            'shiny': false,
-            'team': false,
-            'index': i++,
-          });
-        });
-      }
-    }).then((value) => loadRoutes());
+  void generateRoutes(
+    CollectionReference<Map<String, dynamic>> collection,
+    List<String> routeName,
+  ) {
+    collection
+        .get()
+        .then((value) {
+          if (value.size == 0) {
+            int i = 0;
+            routeName.forEach((element) async {
+              await collection.add({
+                'nombre': element,
+                'pokeObt': "",
+                'pokeDel': "",
+                'pokeObtNum': "",
+                'pokeDelNum': "",
+                'status': "",
+                'type1': "",
+                'type2': "",
+                'failed': false,
+                'dead': false,
+                'shiny': false,
+                'team': false,
+                'index': i++,
+              });
+            });
+          }
+        })
+        .then((value) => loadRoutes());
   }
 
   void loadRoutes() async {
     await db.collection("routes").orderBy("index").get().then((querySnapshot) {
-      querySnapshot.docs.forEach((result) {
+      for (var result in querySnapshot.docs) {
         routesID.add(result.id);
-      });
+      }
     });
     setState(() {
       print("Ya he cargado los path");
@@ -91,24 +90,26 @@ class _RouteScreenState extends State<RouteScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: (gameName != "")
-              ? Text("Pokémon $gameName", style: const TextStyle(fontSize: 16))
-              : Text(""),
-          actions: [
-            IconButton(
-              icon: Icon((search == false)
+        title: (gameName != "")
+            ? Text("Pokémon $gameName", style: const TextStyle(fontSize: 16))
+            : Text(""),
+        actions: [
+          IconButton(
+            icon: Icon(
+              (search == false)
                   ? Icons.search_rounded
-                  : Icons.search_off_rounded),
-              onPressed: () {
-                setState(() {
-                  search = !search;
-                });
-              },
-            )
-          ]),
+                  : Icons.search_off_rounded,
+            ),
+            onPressed: () {
+              setState(() {
+                search = !search;
+              });
+            },
+          ),
+        ],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
       floatingActionButton: FloatingActionButton(
-        child:
-            const Icon(Icons.backpack_outlined, size: 40, color: Colors.white),
         backgroundColor: Colors.orange[700],
         onPressed: () {
           Navigator.of(context).push(
@@ -121,6 +122,11 @@ class _RouteScreenState extends State<RouteScreen> {
             ),
           );
         },
+        child: const Icon(
+          Icons.backpack_outlined,
+          size: 40,
+          color: Colors.white,
+        ),
       ),
       body: (routesID.isEmpty)
           ? const Center(child: CircularProgressIndicator())
@@ -131,43 +137,50 @@ class _RouteScreenState extends State<RouteScreen> {
                 if (search)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(10, 0, 10, 5),
-                    child: Row(children: [
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 20),
-                          child: TextField(
-                            controller: controller,
-                            cursorColor: Colors.orange,
-                            decoration: const InputDecoration(
-                              hintText: "Route Name",
-                              focusedBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(color: Colors.orange),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 20),
+                            child: TextField(
+                              controller: controller,
+                              cursorColor: Colors.orange,
+                              decoration: const InputDecoration(
+                                hintText: "Route Name",
+                                focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.orange),
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                      OutlinedButton(
+                        OutlinedButton(
                           onPressed: () {
                             setState(() {});
                           },
-                          child: const Text("Search",
-                              style: TextStyle(color: Colors.white)),
                           style: OutlinedButton.styleFrom(
-                              minimumSize: const Size(55, 30),
-                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                              side: const BorderSide(color: Colors.white54),
-                              backgroundColor: Colors.orange))
-                    ]),
+                            minimumSize: const Size(55, 30),
+                            padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                            side: const BorderSide(color: Colors.white54),
+                            backgroundColor: Colors.orange,
+                          ),
+                          child: const Text(
+                            "Search",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 Expanded(
                   child: ListView.builder(
                     itemCount: routesID.length,
                     itemBuilder: (BuildContext context, int index) {
                       return RouteSnapshot(
-                          db: db,
-                          path: routesID[index],
-                          findRoute: controller.text);
+                        db: db,
+                        path: routesID[index],
+                        findRoute: controller.text,
+                      );
                     },
                   ),
                 ),
@@ -184,8 +197,8 @@ class RouteSnapshot extends StatelessWidget {
     required this.path,
     required this.findRoute,
     required this.db,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final DocumentReference<Map<String, dynamic>> db;
 
@@ -193,27 +206,28 @@ class RouteSnapshot extends StatelessWidget {
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: db.collection("routes").doc(path).snapshots(),
-      builder: (
-        BuildContext context,
-        AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot,
-      ) {
-        if (!snapshot.hasData) {
-          return const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Center(child: CircularProgressIndicator()),
-          );
-        }
-        final doc = snapshot.data!.data();
-        if (doc != null) {
-          return RouteInfo(
-            routeInfo: RouteClass.fromFireBasse(doc),
-            doc: db.collection("routes").doc(path),
-            findRoute: findRoute,
-          );
-        } else {
-          return const Center(child: Text("doc is null!"));
-        }
-      },
+      builder:
+          (
+            BuildContext context,
+            AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot,
+          ) {
+            if (!snapshot.hasData) {
+              return const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            final doc = snapshot.data!.data();
+            if (doc != null) {
+              return RouteInfo(
+                routeInfo: RouteClass.fromFireBasse(doc),
+                doc: db.collection("routes").doc(path),
+                findRoute: findRoute,
+              );
+            } else {
+              return const Center(child: Text("doc is null!"));
+            }
+          },
     );
   }
 }
@@ -227,8 +241,8 @@ class RouteInfo extends StatelessWidget {
     required this.routeInfo,
     required this.findRoute,
     required this.doc,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -237,33 +251,41 @@ class RouteInfo extends StatelessWidget {
       if (routeInfo.pokemonObtNum != "") {
         return FutureBuilder(
           future: paletteGenerator(routeInfo.pokemonObtNum),
-          builder: (BuildContext context,
-              AsyncSnapshot<PaletteGenerator> snapshotObt) {
-            if (!snapshotObt.hasData) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-            if (routeInfo.pokemonDelNum != "") {
-              return FutureBuilder(
-                future: paletteGenerator(routeInfo.pokemonDelNum),
-                builder: (BuildContext context,
-                    AsyncSnapshot<PaletteGenerator> snapshotDel) {
-                  if (!snapshotDel.hasData) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-                  return ContainerRoute(
-                      true,
-                      snapshotDel.data!.dominantColor!.color,
-                      snapshotObt.data!.dominantColor!.color);
-                },
-              );
-            }
-            return ContainerRoute(true, snapshotObt.data!.dominantColor!.color,
-                snapshotObt.data!.dominantColor!.color);
-          },
+          builder:
+              (
+                BuildContext context,
+                AsyncSnapshot<PaletteGenerator> snapshotObt,
+              ) {
+                if (!snapshotObt.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (routeInfo.pokemonDelNum != "") {
+                  return FutureBuilder(
+                    future: paletteGenerator(routeInfo.pokemonDelNum),
+                    builder:
+                        (
+                          BuildContext context,
+                          AsyncSnapshot<PaletteGenerator> snapshotDel,
+                        ) {
+                          if (!snapshotDel.hasData) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+                          return ContainerRoute(
+                            true,
+                            snapshotDel.data!.dominantColor!.color,
+                            snapshotObt.data!.dominantColor!.color,
+                          );
+                        },
+                  );
+                }
+                return ContainerRoute(
+                  true,
+                  snapshotObt.data!.dominantColor!.color,
+                  snapshotObt.data!.dominantColor!.color,
+                );
+              },
         );
       }
       return ContainerRoute(false, Colors.black38, Colors.black38);
@@ -276,18 +298,16 @@ class RouteInfo extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(12, 6, 12, 6),
       padding: const EdgeInsets.fromLTRB(12, 5, 12, 4),
       decoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(
-          Radius.circular(15),
-        ),
+        borderRadius: const BorderRadius.all(Radius.circular(15)),
         border: Border.all(
           width: 5,
           color: (routeInfo.pokemonObt == "")
               ? Colors.grey
               : (routeInfo.shiny)
-                  ? Colors.yellow
-                  : (routeInfo.failed || routeInfo.dead)
-                      ? Colors.red
-                      : Colors.green,
+              ? Colors.yellow
+              : (routeInfo.failed || routeInfo.dead)
+              ? Colors.red
+              : Colors.green,
         ),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -301,7 +321,7 @@ class RouteInfo extends StatelessWidget {
             blurRadius: 5.0,
             spreadRadius: 3.0,
             offset: Offset(2.0, 2.0), // shadow direction: bottom right
-          )
+          ),
         ],
       ),
       child: Column(
@@ -334,7 +354,7 @@ class RouteInfo extends StatelessWidget {
               CheckBoxText(name: "Shiny", active: routeInfo.shiny, doc: doc),
               CheckBoxText(name: "Team", active: routeInfo.team, doc: doc),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -343,11 +363,11 @@ class RouteInfo extends StatelessWidget {
 
 class PokemonInfo extends StatelessWidget {
   const PokemonInfo({
-    Key? key,
+    super.key,
     required this.routeInfo,
     required this.statusList,
     required this.doc,
-  }) : super(key: key);
+  });
 
   final RouteClass routeInfo;
   final List<String> statusList;
@@ -372,18 +392,20 @@ class PokemonInfo extends StatelessWidget {
             children: [
               const SizedBox(height: 10),
               InputText(
-                  fieldName: "Pokémon:",
-                  pokeObtained: routeInfo.pokemonObt,
-                  pokeDelivered: routeInfo.pokemonDel,
-                  traded: (routeInfo.status == "Traded") ? true : false),
+                fieldName: "Pokémon:",
+                pokeObtained: routeInfo.pokemonObt,
+                pokeDelivered: routeInfo.pokemonDel,
+                traded: (routeInfo.status == "Traded") ? true : false,
+              ),
               const SizedBox(height: 10),
               DropdownButtonContainer(
-                  fieldName: "status",
-                  name: "Status:     ",
-                  statusList: statusList,
-                  status: routeInfo.status,
-                  doc: doc,
-                  traded: (routeInfo.status == "Traded") ? true : false),
+                fieldName: "status",
+                name: "Status:     ",
+                statusList: statusList,
+                status: routeInfo.status,
+                doc: doc,
+                traded: (routeInfo.status == "Traded") ? true : false,
+              ),
             ],
           ),
         ),
@@ -408,8 +430,8 @@ class PokemonSprite extends StatefulWidget {
     required this.traded,
     required this.pokeObtNumDex,
     required this.pokeDelNumDex,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<PokemonSprite> createState() => _PokemonSpriteState();
@@ -421,30 +443,26 @@ class _PokemonSpriteState extends State<PokemonSprite> {
     return GestureDetector(
       onTap: () {
         Navigator.of(context)
-            .push(
-          MaterialPageRoute(
-            builder: (context) => Pokedex(),
-          ),
-        )
+            .push(MaterialPageRoute(builder: (context) => Pokedex()))
             .then((value) {
-          if (value != null) {
-            setState(() {
-              (!widget.traded)
-                  ? widget.doc.update({
-                      'pokeObt': value.name,
-                      'pokeObtNum': value.numberDex.toString().substring(1),
-                      'type1': value.types[0],
-                      'type2': value.types[1],
-                    })
-                  : widget.doc.update({
-                      'pokeDel': value.name,
-                      'pokeDelNum': value.numberDex.toString().substring(1),
-                      'type1': value.types[0],
-                      'type2': value.types[1],
-                    });
+              if (value != null) {
+                setState(() {
+                  (!widget.traded)
+                      ? widget.doc.update({
+                          'pokeObt': value.name,
+                          'pokeObtNum': value.numberDex.toString().substring(1),
+                          'type1': value.types[0],
+                          'type2': value.types[1],
+                        })
+                      : widget.doc.update({
+                          'pokeDel': value.name,
+                          'pokeDelNum': value.numberDex.toString().substring(1),
+                          'type1': value.types[0],
+                          'type2': value.types[1],
+                        });
+                });
+              }
             });
-          }
-        });
       },
       child: Container(
         decoration: BoxDecoration(
@@ -457,10 +475,11 @@ class _PokemonSpriteState extends State<PokemonSprite> {
                     blurRadius: 4.0,
                     spreadRadius: 1.0,
                   )
-                : const BoxShadow(color: Colors.white10)
+                : const BoxShadow(color: Colors.white10),
           ],
         ),
-        child: (widget.pokeObtNumDex == "" ||
+        child:
+            (widget.pokeObtNumDex == "" ||
                 (widget.pokeDelNumDex == "" && widget.traded))
             ? Transform.rotate(
                 angle: 180 * 3.141516 / 180,
@@ -470,14 +489,14 @@ class _PokemonSpriteState extends State<PokemonSprite> {
                 ),
               )
             : (!widget.traded)
-                ? Image.asset(
-                    "assets/sprites/${widget.pokeObtNumDex}.png",
-                    height: 75,
-                  )
-                : Image.asset(
-                    "assets/sprites/${widget.pokeDelNumDex}.png",
-                    height: 75,
-                  ),
+            ? Image.asset(
+                "assets/sprites/${widget.pokeObtNumDex}.png",
+                height: 75,
+              )
+            : Image.asset(
+                "assets/sprites/${widget.pokeDelNumDex}.png",
+                height: 75,
+              ),
       ),
     );
   }
@@ -485,14 +504,14 @@ class _PokemonSpriteState extends State<PokemonSprite> {
 
 class DropdownButtonContainer extends StatefulWidget {
   const DropdownButtonContainer({
-    Key? key,
+    super.key,
     required this.statusList,
     required this.status,
     required this.fieldName,
     required this.name,
     required this.traded,
     required this.doc,
-  }) : super(key: key);
+  });
 
   final List<String> statusList;
   final String status;
@@ -509,39 +528,39 @@ class DropdownButtonContainer extends StatefulWidget {
 class _DropdownButtonContainerState extends State<DropdownButtonContainer> {
   @override
   Widget build(BuildContext context) {
-    return Row(children: [
-      if (!widget.traded) Text(widget.name),
-      Expanded(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.white, width: 1),
-            ),
-            child: DropdownButton(
-              style: const TextStyle(color: Colors.white, fontSize: 14.0),
-              isDense: true,
-              isExpanded: true,
-              itemHeight: null,
-              items: widget.statusList
-                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                  .toList(),
-              hint: Padding(
-                padding: const EdgeInsets.only(left: 4),
-                child: Text(widget.status),
+    return Row(
+      children: [
+        if (!widget.traded) Text(widget.name),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.white, width: 1),
               ),
-              onChanged: (value) => {
-                setState(() {
-                  widget.doc.update({
-                    widget.fieldName: value,
-                  });
-                })
-              },
+              child: DropdownButton(
+                style: const TextStyle(color: Colors.white, fontSize: 14.0),
+                isDense: true,
+                isExpanded: true,
+                itemHeight: null,
+                items: widget.statusList
+                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                    .toList(),
+                hint: Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: Text(widget.status),
+                ),
+                onChanged: (value) => {
+                  setState(() {
+                    widget.doc.update({widget.fieldName: value});
+                  }),
+                },
+              ),
             ),
           ),
         ),
-      )
-    ]);
+      ],
+    );
   }
 }
 
@@ -556,8 +575,8 @@ class CheckBoxText extends StatefulWidget {
     required this.doc,
     required this.active,
     //required this.active,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<CheckBoxText> createState() => _CheckBoxTextState();
@@ -584,15 +603,13 @@ class _CheckBoxTextState extends State<CheckBoxText> {
               WarningDialogue(context);
             }
           },
-          child: Text(
-            widget.name,
-            style: const TextStyle(color: Colors.white),
-          ),
           style: OutlinedButton.styleFrom(
-              minimumSize: const Size(55, 30),
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-              side: const BorderSide(color: Colors.white54),
-              backgroundColor: (widget.active) ? Colors.orange : null),
+            minimumSize: const Size(55, 30),
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+            side: const BorderSide(color: Colors.white54),
+            backgroundColor: (widget.active) ? Colors.orange : null,
+          ),
+          child: Text(widget.name, style: const TextStyle(color: Colors.white)),
         ),
       ],
     );
@@ -606,9 +623,7 @@ class _CheckBoxTextState extends State<CheckBoxText> {
           title: const Text(
             "WARNING",
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
           content: const Text(
             "Team is full. Delete a tem member before adding a new one.",
@@ -618,10 +633,7 @@ class _CheckBoxTextState extends State<CheckBoxText> {
           actions: [
             Center(
               child: TextButton(
-                child: const Text(
-                  "OK",
-                  style: TextStyle(fontSize: 20),
-                ),
+                child: const Text("OK", style: TextStyle(fontSize: 20)),
                 //onPressed: () => Navigator.of(context).pop(),
                 onPressed: () {
                   Navigator.of(context).pop();
@@ -637,32 +649,32 @@ class _CheckBoxTextState extends State<CheckBoxText> {
 
 // ignore: non_constant_identifier_names
 Future<bool> UpdateTeamMember(
-    DocumentReference<Map<String, dynamic>> doc, bool active) async {
+  DocumentReference<Map<String, dynamic>> doc,
+  bool active,
+) async {
   int pokemons = 0;
   bool written = false;
-  await doc.parent.parent!.collection("team").orderBy("index").get().then(
-    (querySnapshot) async {
-      for (var result in querySnapshot.docs) {
-        String reference = await result.data()["reference"];
-        if (!written && !active && reference == "") {
-          doc.parent.parent!
-              .collection("team")
-              .doc(result.id)
-              .update({"reference": doc.id});
-          written = true;
-        } else if (!written && active && reference == doc.id) {
-          doc.parent.parent!
-              .collection("team")
-              .doc(result.id)
-              .update({"reference": ""});
-          written = true;
-        }
-        if (reference != "") {
-          pokemons++;
-        }
+  await doc.parent.parent!.collection("team").orderBy("index").get().then((
+    querySnapshot,
+  ) async {
+    for (var result in querySnapshot.docs) {
+      String reference = await result.data()["reference"];
+      if (!written && !active && reference == "") {
+        doc.parent.parent!.collection("team").doc(result.id).update({
+          "reference": doc.id,
+        });
+        written = true;
+      } else if (!written && active && reference == doc.id) {
+        doc.parent.parent!.collection("team").doc(result.id).update({
+          "reference": "",
+        });
+        written = true;
       }
-    },
-  );
+      if (reference != "") {
+        pokemons++;
+      }
+    }
+  });
   return pokemons == 6;
 }
 
@@ -676,38 +688,40 @@ class InputText extends StatelessWidget {
     this.pokeObtained = "",
     this.pokeDelivered = "",
     this.traded = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Row(children: [
-      if (!traded) Text(fieldName),
-      Expanded(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.white, width: 1),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (traded) Text(pokeDelivered),
-                      if (traded) const Icon(Icons.repeat_rounded, size: 20),
-                    ],
-                  ),
-                  Text(pokeObtained)
-                ],
+    return Row(
+      children: [
+        if (!traded) Text(fieldName),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.white, width: 1),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (traded) Text(pokeDelivered),
+                        if (traded) const Icon(Icons.repeat_rounded, size: 20),
+                      ],
+                    ),
+                    Text(pokeObtained),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-      )
-    ]);
+      ],
+    );
   }
 }

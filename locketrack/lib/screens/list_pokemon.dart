@@ -7,9 +7,7 @@ import 'package:locketrack/custom_classes/pokedex.dart';
 bool search = false;
 
 class Pokedex extends StatefulWidget {
-  Pokedex({
-    Key? key,
-  }) : super(key: key);
+  const Pokedex({super.key});
 
   @override
   State<Pokedex> createState() => _PokedexState();
@@ -22,7 +20,6 @@ class _PokedexState extends State<Pokedex> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     generatePokemons(db);
     controller = TextEditingController(text: "");
@@ -30,34 +27,36 @@ class _PokedexState extends State<Pokedex> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     controller.dispose();
     super.dispose();
   }
 
   void generatePokemons(CollectionReference<Map<String, dynamic>> collection) {
-    collection.get().then((value) {
-      if (value.size == 1) {
-        loadPokedex().then((value) {
-          value.forEach((element) async {
-            await collection.add({
-              'number_dex': element.numberDex,
-              'name': element.name,
-              'type1': element.types[0],
-              'type2': (element.types.length > 1) ? element.types[1] : "",
+    collection
+        .get()
+        .then((value) {
+          if (value.size == 0) {
+            loadPokedex().then((value) {
+              value.forEach((element) async {
+                await collection.add({
+                  'number_dex': element.numberDex,
+                  'name': element.name,
+                  'type1': element.types[0],
+                  'type2': (element.types.length > 1) ? element.types[1] : "",
+                });
+              });
             });
-          });
-        });
-      }
-    }).then((value) => loadPokemons());
+          }
+        })
+        .then((value) => loadPokemons());
   }
 
   void loadPokemons() async {
     await db.orderBy("number_dex").get().then((querySnapshot) {
-      querySnapshot.docs.forEach((result) {
+      for (var result in querySnapshot.docs) {
         pokemonsID.add(result.id);
-      });
-    }).then((value) => pokemonsID.remove(pokemonsID[0]));
+      }
+    });
     setState(() {
       print("Load pokemons id");
     });
@@ -68,17 +67,20 @@ class _PokedexState extends State<Pokedex> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Pokédex"),
+        centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon((search == false)
-                ? Icons.search_rounded
-                : Icons.search_off_rounded),
+            icon: Icon(
+              (search == false)
+                  ? Icons.search_rounded
+                  : Icons.search_off_rounded,
+            ),
             onPressed: () {
               setState(() {
                 search = !search;
               });
             },
-          )
+          ),
         ],
       ),
       body: (pokemonsID.isEmpty)
@@ -90,42 +92,49 @@ class _PokedexState extends State<Pokedex> {
                 if (search)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(10, 0, 10, 5),
-                    child: Row(children: [
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 20),
-                          child: TextField(
-                            controller: controller,
-                            cursorColor: Colors.orange,
-                            decoration: const InputDecoration(
-                              hintText: "Pokémon Name",
-                              focusedBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(color: Colors.orange),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 20),
+                            child: TextField(
+                              controller: controller,
+                              cursorColor: Colors.orange,
+                              decoration: const InputDecoration(
+                                hintText: "Pokémon Name",
+                                focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.orange),
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                      OutlinedButton(
+                        OutlinedButton(
                           onPressed: () {
                             setState(() {});
                           },
-                          child: const Text("Search",
-                              style: TextStyle(color: Colors.white)),
                           style: OutlinedButton.styleFrom(
-                              minimumSize: const Size(55, 30),
-                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                              side: const BorderSide(color: Colors.white54),
-                              backgroundColor: Colors.orange))
-                    ]),
+                            minimumSize: const Size(55, 30),
+                            padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                            side: const BorderSide(color: Colors.white54),
+                            backgroundColor: Colors.orange,
+                          ),
+                          child: const Text(
+                            "Search",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 Expanded(
                   child: ListView.builder(
                     itemCount: pokemonsID.length,
                     itemBuilder: (BuildContext context, int index) {
                       return PokemonSnapshot(
-                          db: db.doc(pokemonsID[index]),
-                          findPokemon: controller.text);
+                        db: db.doc(pokemonsID[index]),
+                        findPokemon: controller.text,
+                      );
                     },
                   ),
                 ),
@@ -140,8 +149,8 @@ class PokemonSnapshot extends StatelessWidget {
   const PokemonSnapshot({
     required this.findPokemon,
     required this.db,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final DocumentReference<Map<String, dynamic>> db;
 
@@ -149,26 +158,28 @@ class PokemonSnapshot extends StatelessWidget {
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: db.snapshots(),
-      builder: (
-        BuildContext context,
-        AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot,
-      ) {
-        if (!snapshot.hasData) {
-          return const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Center(child: CircularProgressIndicator()),
-          );
-        }
-        final doc = snapshot.data!.data();
-        if (doc != null) {
-          return PokemonInfo(
-              pokemonInfo: Pokemon.fromFireBase(doc),
-              findPokemon: findPokemon,
-              db: db);
-        } else {
-          return const Center(child: Text("doc is null!"));
-        }
-      },
+      builder:
+          (
+            BuildContext context,
+            AsyncSnapshot<DocumentSnapshot<Map<String, dynamic>>> snapshot,
+          ) {
+            if (!snapshot.hasData) {
+              return const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            final doc = snapshot.data!.data();
+            if (doc != null) {
+              return PokemonInfo(
+                pokemonInfo: Pokemon.fromFireBase(doc),
+                findPokemon: findPokemon,
+                db: db,
+              );
+            } else {
+              return const Center(child: Text("doc is null!"));
+            }
+          },
     );
   }
 }
@@ -181,8 +192,8 @@ class PokemonInfo extends StatefulWidget {
     required this.db,
     required this.pokemonInfo,
     required this.findPokemon,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<PokemonInfo> createState() => _PokemonInfoState();
@@ -195,14 +206,16 @@ class _PokemonInfoState extends State<PokemonInfo> {
   Expanded containerType(String type) {
     return Expanded(
       child: Container(
-        child: Text(type,
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.black.withAlpha(150))),
         padding: const EdgeInsets.all(4),
         margin: const EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(6)),
           border: Border.all(color: Colors.black.withAlpha(150), width: 1),
+        ),
+        child: Text(
+          type,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Colors.black.withAlpha(150)),
         ),
       ),
     );
@@ -217,13 +230,11 @@ class _PokemonInfoState extends State<PokemonInfo> {
         future: paletteGenerator(widget.pokemonInfo.numberDex.substring(1)),
         builder:
             (BuildContext context, AsyncSnapshot<PaletteGenerator> snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-          return PokemonCard(context, snapshot.data!.dominantColor!.color);
-        },
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              return PokemonCard(context, snapshot.data!.dominantColor!.color);
+            },
       );
     }
     return const Center();
@@ -231,13 +242,20 @@ class _PokemonInfoState extends State<PokemonInfo> {
 
   Card PokemonCard(BuildContext context, Color color) {
     return Card(
+      elevation: 0,
+      color: Colors.transparent,
       margin: const EdgeInsets.fromLTRB(10, 4, 10, 4),
       child: ElevatedButton(
         onPressed: () {
           Navigator.of(context).pop(widget.pokemonInfo);
         },
         // Probar a hacer un degradado segun los tipos
-        style: ElevatedButton.styleFrom(primary: color),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
         child: Padding(
           padding: const EdgeInsets.only(bottom: 8),
           child: Row(
@@ -256,19 +274,21 @@ class _PokemonInfoState extends State<PokemonInfo> {
                           style: TextStyle(color: Colors.black.withAlpha(150)),
                         ),
                         const SizedBox(width: 20),
-                        Text(widget.pokemonInfo.name,
-                            style:
-                                TextStyle(color: Colors.black.withAlpha(150))),
+                        Text(
+                          widget.pokemonInfo.name,
+                          style: TextStyle(color: Colors.black.withAlpha(150)),
+                        ),
                         const Spacer(),
                         IconButton(
                           alignment: Alignment.centerRight,
                           padding: const EdgeInsets.all(0),
                           constraints: const BoxConstraints(maxHeight: 34),
                           icon: Icon(
-                              (shiny)
-                                  ? Icons.star_rate_rounded
-                                  : Icons.star_border_rounded,
-                              color: Colors.black.withAlpha(150)),
+                            (shiny)
+                                ? Icons.star_rate_rounded
+                                : Icons.star_border_rounded,
+                            color: Colors.black.withAlpha(150),
+                          ),
                           onPressed: () {
                             setState(() {
                               shiny = !shiny;
@@ -278,7 +298,9 @@ class _PokemonInfoState extends State<PokemonInfo> {
                         Checkbox(
                           activeColor: Colors.black.withAlpha(150),
                           side: BorderSide(
-                              color: Colors.black.withAlpha(150), width: 2),
+                            color: Colors.black.withAlpha(150),
+                            width: 2,
+                          ),
                           materialTapTargetSize:
                               MaterialTapTargetSize.shrinkWrap,
                           value: cath,
@@ -297,19 +319,21 @@ class _PokemonInfoState extends State<PokemonInfo> {
                         if (widget.pokemonInfo.types[1] != "")
                           containerType(widget.pokemonInfo.types[1]),
                       ],
-                    )
+                    ),
                   ],
                 ),
               ),
               Container(
-                  margin: const EdgeInsets.only(left: 10, top: 8),
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white38,
-                  ),
-                  child: Image.asset(
-                      "assets/sprites/${widget.pokemonInfo.numberDex.substring(1)}.png"),
-                  height: 75)
+                margin: const EdgeInsets.only(left: 10, top: 8),
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white38,
+                ),
+                height: 75,
+                child: Image.asset(
+                  "assets/sprites/${widget.pokemonInfo.numberDex.substring(1)}.png",
+                ),
+              ),
             ],
           ),
         ),

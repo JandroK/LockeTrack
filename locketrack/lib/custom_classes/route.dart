@@ -15,16 +15,16 @@ class RouteClass {
   bool team;
 
   RouteClass.fromFireBasse(Map<String, dynamic> doc)
-      : routeName = doc['nombre'],
-        pokemonObt = doc['pokeObt'],
-        pokemonDel = doc['pokeDel'],
-        pokemonObtNum = doc['pokeObtNum'],
-        pokemonDelNum = doc['pokeDelNum'],
-        status = doc['status'],
-        failed = doc['failed'],
-        dead = doc['dead'],
-        shiny = doc['shiny'],
-        team = doc['team'];
+    : routeName = doc['nombre'],
+      pokemonObt = doc['pokeObt'],
+      pokemonDel = doc['pokeDel'],
+      pokemonObtNum = doc['pokeObtNum'],
+      pokemonDelNum = doc['pokeDelNum'],
+      status = doc['status'],
+      failed = doc['failed'],
+      dead = doc['dead'],
+      shiny = doc['shiny'],
+      team = doc['team'];
 }
 
 Future<DocumentSnapshot<Map<String, dynamic>>> getPokemonName(String ID) async {
@@ -107,7 +107,7 @@ List<String> kantoRouteList = [
   "Central Energía",
   "Ruta 23",
   "Calle Victoria",
-  "Cueva Celeste"
+  "Cueva Celeste",
 ];
 
 List<String> johtoRouteList = [
@@ -485,5 +485,5 @@ List<List<String>> regionRouteList = [
   teseliaRouteList,
   kalosRouteList,
   alolaRouteList,
-  galarRouteList
+  galarRouteList,
 ];
